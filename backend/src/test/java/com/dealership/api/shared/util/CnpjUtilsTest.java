@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CnpjUtilsTest {
 
     @Test
-    @DisplayName("Deve normalizar CNPJ formatado removendo pontuações")
+    @DisplayName("Deve normalizar CNPJ formatado removendo caracteres não numéricos")
     void normalize_FormattedCnpj() {
         String input = "62.043.380/0001-07";
         String normalized = CnpjUtils.normalize(input);
@@ -16,7 +16,7 @@ class CnpjUtilsTest {
     }
 
     @Test
-    @DisplayName("Deve manter CNPJ já normalizado sem alterações")
+    @DisplayName("Deve manter CNPJ sem máscara sem alterações")
     void normalize_CleanCnpj() {
         String input = "62043380000107";
         String normalized = CnpjUtils.normalize(input);
@@ -24,8 +24,16 @@ class CnpjUtilsTest {
     }
 
     @Test
-    @DisplayName("Deve retornar null quando CNPJ for null")
+    @DisplayName("Deve retornar null quando a entrada for null")
     void normalize_NullCnpj() {
         assertThat(CnpjUtils.normalize(null)).isNull();
+    }
+
+    @Test
+    @DisplayName("Deve remover espaços e letras mantendo apenas números")
+    void normalize_WithLettersAndSpaces() {
+        String input = " 62.043.380/0001-07 ABC ";
+        String normalized = CnpjUtils.normalize(input);
+        assertThat(normalized).isEqualTo("62043380000107");
     }
 }

@@ -16,7 +16,7 @@ class CepUtilsTest {
     }
 
     @Test
-    @DisplayName("Deve manter CEP já normalizado sem alterações")
+    @DisplayName("Deve manter CEP sem máscara sem alterações")
     void normalize_CleanCep() {
         String input = "58400000";
         String normalized = CepUtils.normalize(input);
@@ -24,8 +24,16 @@ class CepUtilsTest {
     }
 
     @Test
-    @DisplayName("Deve retornar null quando CEP for null")
+    @DisplayName("Deve retornar null quando a entrada for null")
     void normalize_NullCep() {
         assertThat(CepUtils.normalize(null)).isNull();
+    }
+
+    @Test
+    @DisplayName("Deve remover letras e espaços mantendo apenas números")
+    void normalize_WithLettersAndSpaces() {
+        String input = " 58-400 000 CEP ";
+        String normalized = CepUtils.normalize(input);
+        assertThat(normalized).isEqualTo("58400000");
     }
 }
