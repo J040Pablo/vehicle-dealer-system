@@ -5,7 +5,7 @@ import { PageHeader } from "@/shared/components/page-header";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
-import { useVehicles } from "@/modules/vehicles/hooks/use-vehicles";
+import { useVehiclesPaginated } from "@/modules/vehicles/hooks/use-vehicles";
 import { VehicleTable } from "@/modules/vehicles/components/vehicle-table";
 import { VehicleFormDialog } from "@/modules/vehicles/components/vehicle-form-dialog";
 import { DeleteVehicleDialog } from "@/modules/vehicles/components/delete-vehicle-dialog";
@@ -15,7 +15,16 @@ import type { Vehicle } from "@/modules/vehicles/types/vehicle";
 import { getErrorMessage } from "@/shared/api/error";
 
 export function VehiclesPage() {
-  const { data: vehicles, isLoading, isError, error } = useVehicles();
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(10);
+
+  const { data: pageData, isLoading, isError, error } = useVehiclesPaginated(page, size);
+
+  const vehicles = pageData?.content;
+  const totalPages = pageData?.totalPages ?? 1;
+  const totalElements = pageData?.totalElements ?? 0;
+  const isFirst = pageData?.first;
+  const isLast = pageData?.last;
 
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 300);
@@ -34,7 +43,7 @@ export function VehiclesPage() {
     setFormOpen(true);
   }
 
-  // Client-side filtering by brand, model, plate with 300ms debounce
+  // Client-side filtering by brand, model, plate for the loaded page items
   const filteredVehicles = useMemo(() => {
     if (!vehicles) return [];
     if (!debouncedSearch.trim()) return vehicles;
@@ -97,13 +106,21 @@ export function VehiclesPage() {
       ) : (
         <VehicleTable
           vehicles={filteredVehicles}
-          rawVehiclesCount={vehicles?.length ?? 0}
+          rawVehiclesCount={totalElements}
           isFiltered={isFiltered}
           onClearFilter={() => setSearchTerm("")}
           isLoading={false}
           onEdit={openEditForm}
           onDelete={setDeletingVehicle}
           onCreate={openCreateForm}
+          page={page}
+          totalPages={totalPages}
+          totalElements={totalElements}
+          size={size}
+          onPageChange={setPage}
+          onSizeChange={setSize}
+          isFirst={isFirst}
+          isLast={isLast}
         />
       )}
 

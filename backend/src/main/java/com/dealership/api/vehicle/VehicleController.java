@@ -6,11 +6,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/vehicles")
@@ -21,9 +23,11 @@ public class VehicleController {
     private final VehicleService vehicleService;
 
     @GetMapping
-    @Operation(summary = "Listar veículos (filtro opcional por dealerId)")
-    public ResponseEntity<List<VehicleResponseDTO>> findAll(@RequestParam(required = false) Long dealerId) {
-        return ResponseEntity.ok(vehicleService.findAll(dealerId));
+    @Operation(summary = "Listar veículos com paginação (filtro opcional por dealerId)")
+    public ResponseEntity<Page<VehicleResponseDTO>> findAll(
+            @RequestParam(required = false) Long dealerId,
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok(vehicleService.findAll(dealerId, pageable));
     }
 
     @GetMapping("/{id}")

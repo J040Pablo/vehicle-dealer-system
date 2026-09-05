@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -52,17 +55,24 @@ class DealerControllerTest {
     }
 
     @Test
-    @DisplayName("GET /dealer - Deve retornar lista de concessionárias com HTTP 200")
+    @DisplayName("GET /dealer - Deve retornar página de concessionárias com HTTP 200")
     void findAll_Success() throws Exception {
-        when(dealerService.findAll()).thenReturn(List.of(responseDTO));
+        PageImpl<DealerResponseDTO> page = new PageImpl<>(List.of(responseDTO), PageRequest.of(0, 10), 1);
+        when(dealerService.findAll(any(Pageable.class))).thenReturn(page);
 
-        mockMvc.perform(get("/dealer"))
+        mockMvc.perform(get("/dealer")
+                        .param("page", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].name").value("Concessionária SP"))
-                .andExpect(jsonPath("$[0].totalVehicles").value(5));
+                .andExpect(jsonPath("$.content[0].id").value(1L))
+                .andExpect(jsonPath("$.content[0].name").value("Concessionária SP"))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.first").value(true));
 
-        verify(dealerService, times(1)).findAll();
+        verify(dealerService, times(1)).findAll(any(Pageable.class));
     }
 
     @Test

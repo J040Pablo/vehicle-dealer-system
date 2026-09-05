@@ -10,6 +10,8 @@ import com.dealership.api.vehicle.dto.VehicleResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,17 @@ public class VehicleService {
     private final VehicleMapper vehicleMapper;
     private final DealerService dealerService;
     private final ApplicationEventPublisher eventPublisher;
+
+    @Transactional(readOnly = true)
+    public Page<VehicleResponseDTO> findAll(Long dealerId, Pageable pageable) {
+        if (dealerId != null) {
+            log.info("Buscando veículos da concessionária ID: {}", dealerId);
+            return vehicleRepository.findByDealerId(dealerId, pageable)
+                    .map(vehicleMapper::toDTO);
+        }
+        return vehicleRepository.findAll(pageable)
+                .map(vehicleMapper::toDTO);
+    }
 
     @Transactional(readOnly = true)
     public List<VehicleResponseDTO> findAll(Long dealerId) {

@@ -1,12 +1,27 @@
 import { http } from "@/shared/api/http";
 import type { Vehicle, VehicleInput } from "@/modules/vehicles/types/vehicle";
+import type { PageResponse, PageParams } from "@/shared/types/api";
+
+export interface VehicleQueryParams extends PageParams {
+  dealerId?: number;
+}
 
 export const vehicleApi = {
-  async list(dealerId?: number): Promise<Vehicle[]> {
-    const { data } = await http.get<Vehicle[]>("/vehicles", {
-      params: dealerId ? { dealerId } : undefined,
+  async list(params?: VehicleQueryParams): Promise<PageResponse<Vehicle>> {
+    const { data } = await http.get<PageResponse<Vehicle>>("/vehicles", {
+      params: {
+        page: params?.page ?? 0,
+        size: params?.size ?? 10,
+        sort: params?.sort ?? "id,asc",
+        ...(params?.dealerId ? { dealerId: params.dealerId } : {}),
+      },
     });
     return data;
+  },
+
+  async listAll(dealerId?: number): Promise<Vehicle[]> {
+    const data = await vehicleApi.list({ page: 0, size: 1000, dealerId });
+    return data.content;
   },
 
   async create(input: VehicleInput): Promise<Vehicle> {

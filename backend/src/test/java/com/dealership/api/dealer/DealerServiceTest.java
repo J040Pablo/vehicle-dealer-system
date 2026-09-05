@@ -18,6 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.client.ResourceAccessException;
 
 import java.util.ArrayList;
@@ -87,6 +91,23 @@ class DealerServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).id()).isEqualTo(1L);
         verify(dealerRepository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("Deve buscar concessionárias paginadas com sucesso")
+    void findAll_Pageable_Success() {
+        Pageable pageable = PageRequest.of(0, 10);
+        PageImpl<Dealer> page = new PageImpl<>(List.of(dealerEntity), pageable, 1);
+
+        when(dealerRepository.findAll(pageable)).thenReturn(page);
+        when(dealerMapper.toDTO(dealerEntity)).thenReturn(responseDTO);
+
+        Page<DealerResponseDTO> result = dealerService.findAll(pageable);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).id()).isEqualTo(1L);
+        verify(dealerRepository, times(1)).findAll(pageable);
     }
 
     @Test

@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -76,6 +78,16 @@ class VehicleRepositoryTest {
 
         assertThat(vehicles).hasSize(1);
         assertThat(vehicles.get(0).getPlate()).isEqualTo("ABC1D23");
+    }
+
+    @Test
+    @DisplayName("Deve buscar veículos paginados por dealerId")
+    void findByDealerId_Pageable() {
+        Page<Vehicle> vehicles = vehicleRepository.findByDealerId(dealer.getId(), PageRequest.of(0, 10));
+
+        assertThat(vehicles).isNotNull();
+        assertThat(vehicles.getTotalElements()).isEqualTo(1);
+        assertThat(vehicles.getContent().get(0).getPlate()).isEqualTo("ABC1D23");
     }
 
     @Test

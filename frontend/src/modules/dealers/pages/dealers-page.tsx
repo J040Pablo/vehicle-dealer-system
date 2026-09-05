@@ -5,7 +5,7 @@ import { PageHeader } from "@/shared/components/page-header";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
-import { useDealers } from "@/modules/dealers/hooks/use-dealers";
+import { useDealersPaginated } from "@/modules/dealers/hooks/use-dealers";
 import { DealerTable } from "@/modules/dealers/components/dealer-table";
 import { DealerFormDialog } from "@/modules/dealers/components/dealer-form-dialog";
 import { DeleteDealerDialog } from "@/modules/dealers/components/delete-dealer-dialog";
@@ -16,7 +16,16 @@ import type { Dealer } from "@/modules/dealers/types/dealer";
 import { getErrorMessage } from "@/shared/api/error";
 
 export function DealersPage() {
-  const { data: dealers, isLoading, isError, error } = useDealers();
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(10);
+
+  const { data: pageData, isLoading, isError, error } = useDealersPaginated(page, size);
+
+  const dealers = pageData?.content;
+  const totalPages = pageData?.totalPages ?? 1;
+  const totalElements = pageData?.totalElements ?? 0;
+  const isFirst = pageData?.first;
+  const isLast = pageData?.last;
 
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 300);
@@ -36,7 +45,7 @@ export function DealersPage() {
     setFormOpen(true);
   }
 
-  // Client-side filtering by name (Razão Social), CNPJ, or city with 300ms debounce
+  // Client-side filtering by name, CNPJ, or city for the loaded page items
   const filteredDealers = useMemo(() => {
     if (!dealers) return [];
     if (!debouncedSearch.trim()) return dealers;
@@ -99,7 +108,7 @@ export function DealersPage() {
       ) : (
         <DealerTable
           dealers={filteredDealers}
-          rawDealersCount={dealers?.length ?? 0}
+          rawDealersCount={totalElements}
           isFiltered={isFiltered}
           onClearFilter={() => setSearchTerm("")}
           isLoading={false}
@@ -107,6 +116,14 @@ export function DealersPage() {
           onDelete={setDeletingDealer}
           onViewVehicles={setViewingDealer}
           onCreate={openCreateForm}
+          page={page}
+          totalPages={totalPages}
+          totalElements={totalElements}
+          size={size}
+          onPageChange={setPage}
+          onSizeChange={setSize}
+          isFirst={isFirst}
+          isLast={isLast}
         />
       )}
 

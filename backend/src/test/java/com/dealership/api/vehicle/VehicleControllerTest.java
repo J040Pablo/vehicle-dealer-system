@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -52,28 +55,32 @@ class VehicleControllerTest {
     }
 
     @Test
-    @DisplayName("GET /vehicles - Deve listar todos os veículos com HTTP 200")
+    @DisplayName("GET /vehicles - Deve listar página de veículos com HTTP 200")
     void findAll_WithoutDealerId_Success() throws Exception {
-        when(vehicleService.findAll(null)).thenReturn(List.of(responseDTO));
+        PageImpl<VehicleResponseDTO> page = new PageImpl<>(List.of(responseDTO), PageRequest.of(0, 10), 1);
+        when(vehicleService.findAll(eq(null), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/vehicles"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(10L))
-                .andExpect(jsonPath("$[0].brand").value("Toyota"));
+                .andExpect(jsonPath("$.content[0].id").value(10L))
+                .andExpect(jsonPath("$.content[0].brand").value("Toyota"))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1));
 
-        verify(vehicleService, times(1)).findAll(null);
+        verify(vehicleService, times(1)).findAll(eq(null), any(Pageable.class));
     }
 
     @Test
     @DisplayName("GET /vehicles?dealerId=1 - Deve listar veículos por concessionária com HTTP 200")
     void findAll_WithDealerId_Success() throws Exception {
-        when(vehicleService.findAll(1L)).thenReturn(List.of(responseDTO));
+        PageImpl<VehicleResponseDTO> page = new PageImpl<>(List.of(responseDTO), PageRequest.of(0, 10), 1);
+        when(vehicleService.findAll(eq(1L), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/vehicles").param("dealerId", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].dealerId").value(1L));
+                .andExpect(jsonPath("$.content[0].dealerId").value(1L));
 
-        verify(vehicleService, times(1)).findAll(1L);
+        verify(vehicleService, times(1)).findAll(eq(1L), any(Pageable.class));
     }
 
     @Test
