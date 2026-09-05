@@ -85,7 +85,7 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar veículo" : "Novo veículo"}</DialogTitle>
           <DialogDescription>
@@ -96,8 +96,8 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="brand"
@@ -126,7 +126,7 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="year"
@@ -219,7 +219,7 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
               )}
             />
 
-            <DialogFooter>
+            <DialogFooter className="pt-2 gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
                 Cancelar
               </Button>

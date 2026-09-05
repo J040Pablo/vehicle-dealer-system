@@ -1,18 +1,25 @@
-import { useState } from "react";
-import { Plus, AlertTriangle } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, AlertTriangle, Search, X } from "lucide-react";
 
 import { PageHeader } from "@/shared/components/page-header";
 import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
 import { useDealers } from "@/modules/dealers/hooks/use-dealers";
 import { DealerTable } from "@/modules/dealers/components/dealer-table";
 import { DealerFormDialog } from "@/modules/dealers/components/dealer-form-dialog";
 import { DeleteDealerDialog } from "@/modules/dealers/components/delete-dealer-dialog";
 import { DealerVehiclesDialog } from "@/modules/dealers/components/dealer-vehicles-dialog";
+import { DealerTableSkeleton } from "@/shared/components/skeletons/dealer-table-skeleton";
+import { useDebounce } from "@/shared/hooks/use-debounce";
 import type { Dealer } from "@/modules/dealers/types/dealer";
 import { getErrorMessage } from "@/shared/api/error";
 
 export function DealersPage() {
   const { data: dealers, isLoading, isError, error } = useDealers();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingDealer, setEditingDealer] = useState<Dealer | null>(null);
@@ -29,28 +36,73 @@ export function DealersPage() {
     setFormOpen(true);
   }
 
+  // Client-side filtering by name (Razão Social), CNPJ, or city with 300ms debounce
+  const filteredDealers = useMemo(() => {
+    if (!dealers) return [];
+    if (!debouncedSearch.trim()) return dealers;
+    const query = debouncedSearch.toLowerCase().trim();
+    return dealers.filter(
+      (d) =>
+        d.name.toLowerCase().includes(query) ||
+        d.cnpj.toLowerCase().includes(query) ||
+        d.city.toLowerCase().includes(query)
+    );
+  }, [dealers, debouncedSearch]);
+
+  const isFiltered = debouncedSearch.trim().length > 0;
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Concessionárias"
         description="Gerencie as concessionárias parceiras e seus veículos vinculados."
         action={
-          <Button onClick={openCreateForm}>
-            <Plus className="h-4 w-4" />
+          <Button onClick={openCreateForm} className="w-full sm:w-auto shadow-sm">
+            <Plus className="h-4 w-4 mr-1.5" />
             Nova concessionária
           </Button>
         }
       />
 
-      {isError ? (
-        <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <p>Não foi possível carregar as concessionárias. {getErrorMessage(error)}</p>
-        </div>
+      {/* Instant Search Bar with 300ms Debounce */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Buscar por razão social, CNPJ ou cidade..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          aria-label="Buscar concessionárias por razão social, CNPJ ou cidade"
+          className="pl-9 pr-9"
+        />
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label="Limpar busca"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {isLoading ? (
+        <DealerTableSkeleton />
+      ) : isError ? (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Erro ao carregar concessionárias</AlertTitle>
+          <AlertDescription>
+            Não foi possível carregar a lista de concessionárias. {getErrorMessage(error)}
+          </AlertDescription>
+        </Alert>
       ) : (
         <DealerTable
-          dealers={dealers}
-          isLoading={isLoading}
+          dealers={filteredDealers}
+          rawDealersCount={dealers?.length ?? 0}
+          isFiltered={isFiltered}
+          onClearFilter={() => setSearchTerm("")}
+          isLoading={false}
           onEdit={openEditForm}
           onDelete={setDeletingDealer}
           onViewVehicles={setViewingDealer}

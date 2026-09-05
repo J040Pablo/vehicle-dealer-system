@@ -29,14 +29,14 @@ export const FUEL_TYPE_OPTIONS: { value: FuelType; label: string }[] = (
   Object.keys(FUEL_TYPE_LABELS) as FuelType[]
 ).map((value) => ({ value, label: FUEL_TYPE_LABELS[value] }));
 
-/** Badge color tokens per fuel type — kept in one place so the table and form stay in sync. */
+/** Badge color tokens per fuel type — kept in one place so tables and forms stay in sync. */
 export const FUEL_TYPE_BADGE_CLASSES: Record<FuelType, string> = {
-  GASOLINA: "bg-amber-50 text-amber-700 border-amber-200",
-  ETANOL: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  FLEX: "bg-sky-50 text-sky-700 border-sky-200",
-  DIESEL: "bg-zinc-100 text-zinc-700 border-zinc-200",
-  ELETRICO: "bg-teal-50 text-teal-700 border-teal-200",
-  HIBRIDO: "bg-violet-50 text-violet-700 border-violet-200",
+  GASOLINA: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 font-medium",
+  ETANOL: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 font-medium",
+  FLEX: "bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/30 font-medium",
+  DIESEL: "bg-zinc-500/10 text-zinc-700 dark:text-zinc-400 border-zinc-500/30 font-medium",
+  ELETRICO: "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/30 font-medium",
+  HIBRIDO: "bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-500/30 font-medium",
 };
 
 export function formatDate(value?: string | null): string {

@@ -1,47 +1,63 @@
-import { NavLink, useLocation } from "react-router-dom";
-import { Building2, Car, LayoutDashboard } from "lucide-react";
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { Menu, ChevronRight } from "lucide-react";
 
-import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/shared/components/ui/sheet";
+import { Sidebar } from "@/shared/layouts/sidebar";
 
-const PAGE_TITLES: Record<string, string> = {
-  "/": "Dashboard",
-  "/veiculos": "Veículos",
-  "/concessionarias": "Concessionárias",
+interface RouteConfig {
+  section: string;
+  title: string;
+}
+
+const ROUTE_CONFIGS: Record<string, RouteConfig> = {
+  "/": { section: "Visão Geral", title: "Dashboard" },
+  "/veiculos": { section: "Catálogo", title: "Veículos" },
+  "/concessionarias": { section: "Parceiros", title: "Concessionárias" },
 };
-
-const MOBILE_NAV_ITEMS = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/veiculos", label: "Veículos", icon: Car, end: false },
-  { to: "/concessionarias", label: "Concessionárias", icon: Building2, end: false },
-] as const;
 
 export function Header() {
   const { pathname } = useLocation();
-  const title = PAGE_TITLES[pathname] ?? "Vehicle Dealer";
+  const routeConfig = ROUTE_CONFIGS[pathname] ?? { section: "Sistema", title: "Vehicle Dealer" };
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-border bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <h2 className="text-sm font-medium text-foreground md:hidden">{title}</h2>
-      <h2 className="hidden text-sm font-medium text-muted-foreground md:block">{title}</h2>
+    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-border bg-background/80 px-4 sm:px-6 backdrop-blur-md transition-all">
+      <div className="flex items-center gap-3">
+        {/* Mobile Hamburger Drawer Trigger */}
+        <div className="md:hidden">
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Abrir menu de navegação"
+                className="h-9 w-9 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 border-r-0 w-[240px] bg-background">
+              <SheetHeader className="sr-only">
+                <SheetTitle>Menu de Navegação</SheetTitle>
+              </SheetHeader>
+              <Sidebar
+                isMobileDrawer
+                onNavigate={() => setMobileOpen(false)}
+                className="w-full h-full border-r-0"
+              />
+            </SheetContent>
+          </Sheet>
+        </div>
 
-      <nav className="ml-auto flex items-center gap-1 md:hidden">
-        {MOBILE_NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              cn(
-                "flex h-8 w-8 items-center justify-center rounded-md",
-                isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-              )
-            }
-            aria-label={label}
-          >
-            <Icon className="h-4 w-4" />
-          </NavLink>
-        ))}
-      </nav>
+        {/* Clean Breadcrumb Trail & Page Title */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground text-sm tracking-tight">{routeConfig.title}</span>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
+          <span className="text-muted-foreground/80 font-medium">{routeConfig.section}</span>
+        </div>
+      </div>
     </header>
   );
 }

@@ -74,18 +74,18 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? "Editar concessionária" : "Nova concessionária"}</DialogTitle>
           <DialogDescription>
             {isEditMode
               ? "Atualize os dados cadastrais da concessionária."
-              : "O endereço é preenchido automaticamente a partir do CEP."}
+              : "O endereço é preenchido automaticamente a partir do CEP informado."}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
             <FormField
               control={form.control}
               name="name"
@@ -100,46 +100,49 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="cnpj"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CNPJ</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="XX.XXX.XXX/XXXX-XX"
-                      {...field}
-                      onChange={(e) => field.onChange(maskCnpj(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="cnpj"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CNPJ</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="XX.XXX.XXX/XXXX-XX"
+                        {...field}
+                        onChange={(e) => field.onChange(maskCnpj(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="cep"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CEP</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="XXXXX-XXX"
-                      {...field}
-                      onChange={(e) => field.onChange(maskCep(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Usado para preencher automaticamente o endereço via ViaCEP.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="cep"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CEP</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="XXXXX-XXX"
+                        {...field}
+                        onChange={(e) => field.onChange(maskCep(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormDescription className="text-xs text-muted-foreground">
+              O CEP é utilizado para buscar o endereço via integração com a API ViaCEP no backend.
+            </FormDescription>
 
-            <DialogFooter>
+            <DialogFooter className="pt-2 gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
                 Cancelar
               </Button>

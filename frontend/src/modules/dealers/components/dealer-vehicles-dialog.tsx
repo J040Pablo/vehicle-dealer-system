@@ -23,16 +23,16 @@ export function DealerVehiclesDialog({ dealer, onOpenChange }: DealerVehiclesDia
 
   return (
     <Dialog open={!!dealer} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-xl">
         <DialogHeader>
           <DialogTitle>Veículos de {dealer?.name}</DialogTitle>
-          <DialogDescription>Veículos atualmente vinculados a esta concessionária.</DialogDescription>
+          <DialogDescription>Catálogo de veículos atualmente vinculados a esta concessionária.</DialogDescription>
         </DialogHeader>
 
         {isLoading ? (
-          <div className="space-y-2">
+          <div className="space-y-2 py-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
+              <Skeleton key={i} className="h-12 w-full rounded-lg" />
             ))}
           </div>
         ) : !vehicles || vehicles.length === 0 ? (
@@ -42,14 +42,14 @@ export function DealerVehiclesDialog({ dealer, onOpenChange }: DealerVehiclesDia
             description="Esta concessionária ainda não possui veículos associados."
           />
         ) : (
-          <ul className="divide-y divide-border rounded-lg border border-border">
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden">
             {vehicles.map((vehicle) => (
-              <li key={vehicle.id} className="flex items-center justify-between gap-3 px-4 py-3">
+              <li key={vehicle.id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/50 transition-colors">
                 <div>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-semibold text-foreground">
                     {vehicle.brand} {vehicle.model}
                   </p>
-                  <p className="font-mono text-xs text-muted-foreground">{vehicle.plate}</p>
+                  <p className="font-mono text-xs text-muted-foreground font-medium">Placa: {vehicle.plate}</p>
                 </div>
                 <FuelBadge fuelType={vehicle.fuelType} />
               </li>
