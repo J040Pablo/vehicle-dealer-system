@@ -1,6 +1,7 @@
 package com.dealership.api.viacep;
 
 import com.dealership.api.shared.exception.BusinessException;
+import com.dealership.api.shared.util.CepUtils;
 import com.dealership.api.viacep.client.ViaCepClient;
 import com.dealership.api.viacep.dto.ViaCepResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class ViaCepService {
             throw new BusinessException("O CEP é obrigatório para o cadastro da concessionária.");
         }
 
-        String cleanCep = rawCep.replaceAll("\\D", "");
+        String cleanCep = CepUtils.normalize(rawCep);
         if (cleanCep.length() != 8) {
             throw new BusinessException("O CEP informado é inválido: " + rawCep + ". Deve conter 8 dígitos numéricos.");
         }

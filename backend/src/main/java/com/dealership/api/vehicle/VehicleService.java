@@ -3,7 +3,7 @@ package com.dealership.api.vehicle;
 import com.dealership.api.dealer.Dealer;
 import com.dealership.api.dealer.DealerService;
 import com.dealership.api.shared.audit.AuditEvent;
-import com.dealership.api.shared.exception.BusinessException;
+import com.dealership.api.shared.exception.DuplicatePlateException;
 import com.dealership.api.shared.exception.ResourceNotFoundException;
 import com.dealership.api.vehicle.dto.VehicleRequestDTO;
 import com.dealership.api.vehicle.dto.VehicleResponseDTO;
@@ -49,7 +49,7 @@ public class VehicleService {
         log.info("Cadastrando veículo: Marca={} Modelo={} Placa={}", dto.brand(), dto.model(), dto.plate());
 
         if (vehicleRepository.existsByPlate(dto.plate())) {
-            throw new BusinessException("Já existe um veículo cadastrado com a placa: " + dto.plate());
+            throw new DuplicatePlateException(dto.plate());
         }
 
         Vehicle vehicle = vehicleMapper.toEntity(dto);
@@ -67,8 +67,8 @@ public class VehicleService {
                 "VEHICLE",
                 saved.getId(),
                 "CREATE",
-                "Created Vehicle: " + saved.getBrand() + " " + saved.getModel() + " (Plate: " + saved.getPlate() + ")"
-        ));
+                "Created Vehicle: " + saved.getBrand() + " " + saved.getModel() + " (Plate: " + saved.getPlate()
+                        + ")"));
 
         return vehicleMapper.toDTO(saved);
     }
@@ -80,7 +80,7 @@ public class VehicleService {
         Vehicle vehicle = getVehicleEntity(id);
 
         if (vehicleRepository.existsByPlateAndIdNot(dto.plate(), id)) {
-            throw new BusinessException("Já existe outro veículo cadastrado com a placa: " + dto.plate());
+            throw new DuplicatePlateException(dto.plate());
         }
 
         vehicleMapper.updateEntityFromDTO(dto, vehicle);
@@ -100,8 +100,8 @@ public class VehicleService {
                 "VEHICLE",
                 updated.getId(),
                 "UPDATE",
-                "Updated Vehicle: " + updated.getBrand() + " " + updated.getModel() + " (Plate: " + updated.getPlate() + ")"
-        ));
+                "Updated Vehicle: " + updated.getBrand() + " " + updated.getModel() + " (Plate: " + updated.getPlate()
+                        + ")"));
 
         return vehicleMapper.toDTO(updated);
     }
@@ -120,8 +120,7 @@ public class VehicleService {
                 "VEHICLE",
                 vehicleId,
                 "UPDATE",
-                "Associated Vehicle ID " + vehicleId + " to Dealer ID " + dealerId
-        ));
+                "Associated Vehicle ID " + vehicleId + " to Dealer ID " + dealerId));
 
         return vehicleMapper.toDTO(updated);
     }
@@ -140,8 +139,7 @@ public class VehicleService {
                 "VEHICLE",
                 id,
                 "DELETE",
-                "Deleted Vehicle ID: " + id
-        ));
+                "Deleted Vehicle ID: " + id));
     }
 
     private Vehicle getVehicleEntity(Long id) {

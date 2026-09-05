@@ -3,8 +3,10 @@ package com.dealership.api.dealer;
 import com.dealership.api.dealer.dto.DealerRequestDTO;
 import com.dealership.api.dealer.dto.DealerResponseDTO;
 import com.dealership.api.shared.audit.AuditEvent;
-import com.dealership.api.shared.exception.CnpjAlreadyExistsException;
+import com.dealership.api.shared.exception.DuplicateCnpjException;
 import com.dealership.api.shared.exception.ResourceNotFoundException;
+import com.dealership.api.shared.util.CepUtils;
+import com.dealership.api.shared.util.CnpjUtils;
 import com.dealership.api.viacep.ViaCepService;
 import com.dealership.api.viacep.dto.ViaCepResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -40,16 +42,21 @@ public class DealerService {
 
     @Transactional
     public DealerResponseDTO create(DealerRequestDTO dto) {
-        log.info("Iniciando cadastro de concessionária: CNPJ={}", dto.cnpj());
+        String cleanCnpj = CnpjUtils.normalize(dto.cnpj());
+        String cleanCep = CepUtils.normalize(dto.cep());
 
-        if (dealerRepository.existsByCnpj(dto.cnpj())) {
-            throw new CnpjAlreadyExistsException(dto.cnpj());
+        log.info("Iniciando cadastro de concessionária: CNPJ={}", cleanCnpj);
+
+        if (dealerRepository.existsByCnpj(cleanCnpj)) {
+            throw new DuplicateCnpjException(cleanCnpj);
         }
 
         Dealer dealer = dealerMapper.toEntity(dto);
+        dealer.setCnpj(cleanCnpj);
+        dealer.setCep(cleanCep);
 
         // Preenchimento de endereço via ViaCEP no backend
-        ViaCepResponseDTO addressDTO = viaCepService.fetchAddress(dto.cep());
+        ViaCepResponseDTO addressDTO = viaCepService.fetchAddress(cleanCep);
         dealer.setStreet(addressDTO.street());
         dealer.setNeighborhood(addressDTO.neighborhood());
         dealer.setCity(addressDTO.city());
@@ -63,26 +70,30 @@ public class DealerService {
                 "DEALER",
                 saved.getId(),
                 "CREATE",
-                "Created Dealer: " + saved.getName() + " (CNPJ: " + saved.getCnpj() + ")"
-        ));
+                "Created Dealer: " + saved.getName() + " (CNPJ: " + saved.getCnpj() + ")"));
 
         return dealerMapper.toDTO(saved);
     }
 
     @Transactional
     public DealerResponseDTO update(Long id, DealerRequestDTO dto) {
+        String cleanCnpj = CnpjUtils.normalize(dto.cnpj());
+        String cleanCep = CepUtils.normalize(dto.cep());
+
         log.info("Atualizando concessionária: ID={}", id);
 
         Dealer dealer = getDealerEntity(id);
 
-        if (dealerRepository.existsByCnpjAndIdNot(dto.cnpj(), id)) {
-            throw new CnpjAlreadyExistsException(dto.cnpj());
+        if (dealerRepository.existsByCnpjAndIdNot(cleanCnpj, id)) {
+            throw new DuplicateCnpjException(cleanCnpj);
         }
 
         dealerMapper.updateEntityFromDTO(dto, dealer);
+        dealer.setCnpj(cleanCnpj);
+        dealer.setCep(cleanCep);
 
         // Atualização de endereço caso o CEP tenha mudado ou precise revalidar
-        ViaCepResponseDTO addressDTO = viaCepService.fetchAddress(dto.cep());
+        ViaCepResponseDTO addressDTO = viaCepService.fetchAddress(cleanCep);
         dealer.setStreet(addressDTO.street());
         dealer.setNeighborhood(addressDTO.neighborhood());
         dealer.setCity(addressDTO.city());
@@ -96,8 +107,7 @@ public class DealerService {
                 "DEALER",
                 updated.getId(),
                 "UPDATE",
-                "Updated Dealer: " + updated.getName() + " (CNPJ: " + updated.getCnpj() + ")"
-        ));
+                "Updated Dealer: " + updated.getName() + " (CNPJ: " + updated.getCnpj() + ")"));
 
         return dealerMapper.toDTO(updated);
     }
@@ -107,7 +117,7 @@ public class DealerService {
         log.info("Excluindo concessionária: ID={}", id);
 
         Dealer dealer = getDealerEntity(id);
-        
+
         // Desvincular veículos associados
         if (dealer.getVehicles() != null) {
             dealer.getVehicles().forEach(v -> v.setDealer(null));
@@ -121,8 +131,7 @@ public class DealerService {
                 "DEALER",
                 id,
                 "DELETE",
-                "Deleted Dealer ID: " + id
-        ));
+                "Deleted Dealer ID: " + id));
     }
 
     public Dealer getDealerEntity(Long id) {

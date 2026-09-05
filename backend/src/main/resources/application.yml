@@ -42,9 +42,19 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId:-NO_CORRELATION}] %-5level %logger{36} - %msg%n"
 
+cors:
+  allowed-origins:
+    - ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+viacep:
+  url: ${VIACEP_URL:https://viacep.com.br/ws}
+  connect-timeout: 3000
+  read-timeout: 5000
+
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
+
