@@ -28,7 +28,7 @@ public class AuditLog {
     @Column(name = "action", nullable = false, length = 20)
     private String action;
 
-    @Column(name = "payload", columnDefinition = "TEXT")
+    @Column(name = "payload", length = 4000)
     private String payload;
 
     @CreationTimestamp
