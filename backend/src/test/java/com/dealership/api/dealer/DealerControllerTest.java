@@ -3,6 +3,7 @@ package com.dealership.api.dealer;
 import com.dealership.api.config.CorsProperties;
 import com.dealership.api.dealer.dto.DealerRequestDTO;
 import com.dealership.api.dealer.dto.DealerResponseDTO;
+import com.dealership.api.security.JwtAuthenticationFilter;
 import com.dealership.api.shared.exception.DuplicateCnpjException;
 import com.dealership.api.shared.exception.GlobalExceptionHandler;
 import com.dealership.api.shared.exception.ResourceNotFoundException;
@@ -11,6 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -28,7 +32,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(DealerController.class)
+@WebMvcTest(controllers = DealerController.class, excludeAutoConfiguration = {SecurityAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class})
+@AutoConfigureMockMvc(addFilters = false)
 @Import(GlobalExceptionHandler.class)
 class DealerControllerTest {
 
@@ -43,6 +48,9 @@ class DealerControllerTest {
 
     @MockBean
     private CorsProperties corsProperties;
+
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private DealerRequestDTO requestDTO;
     private DealerResponseDTO responseDTO;
