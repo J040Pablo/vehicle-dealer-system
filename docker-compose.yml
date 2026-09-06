@@ -27,6 +27,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dealership_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgrespassword
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
     depends_on:
       postgres:
         condition: service_healthy

@@ -16,5 +16,24 @@ http.interceptors.request.use((config) => {
   if (!config.headers["X-Correlation-Id"]) {
     config.headers["X-Correlation-Id"] = crypto.randomUUID();
   }
+
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
+
   return config;
 });
+
+http.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);

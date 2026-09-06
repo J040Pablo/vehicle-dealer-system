@@ -2,6 +2,7 @@ package com.dealership.api.user;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,7 +34,7 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 20)
     private Role role;
 
-    @org.hibernate.annotations.CreationTimestamp
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
