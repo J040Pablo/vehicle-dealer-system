@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unchecked")
 class VehicleServiceTest {
 
     @Mock
@@ -83,35 +84,35 @@ class VehicleServiceTest {
     }
 
     @Test
-    @DisplayName("Deve buscar veículos paginados sem filtro de concessionária")
+    @DisplayName("Deve buscar veículos paginados sem filtro de concessionária ou busca")
     void findAll_Pageable_WithoutDealerId_Success() {
         Pageable pageable = PageRequest.of(0, 10);
         PageImpl<Vehicle> page = new PageImpl<>(List.of(vehicleEntity), pageable, 1);
 
-        when(vehicleRepository.findAll(pageable)).thenReturn(page);
+        when(vehicleRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), eq(pageable))).thenReturn(page);
         when(vehicleMapper.toDTO(vehicleEntity)).thenReturn(responseDTO);
 
-        Page<VehicleResponseDTO> result = vehicleService.findAll(null, pageable);
+        Page<VehicleResponseDTO> result = vehicleService.findAll(null, null, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getTotalElements()).isEqualTo(1);
-        verify(vehicleRepository, times(1)).findAll(pageable);
+        verify(vehicleRepository, times(1)).findAll(any(org.springframework.data.jpa.domain.Specification.class), eq(pageable));
     }
 
     @Test
-    @DisplayName("Deve buscar veículos paginados com filtro de concessionária")
-    void findAll_Pageable_WithDealerId_Success() {
+    @DisplayName("Deve buscar veículos paginados com filtro por termo de busca")
+    void findAll_Pageable_WithSearch_Success() {
         Pageable pageable = PageRequest.of(0, 10);
         PageImpl<Vehicle> page = new PageImpl<>(List.of(vehicleEntity), pageable, 1);
 
-        when(vehicleRepository.findByDealerId(1L, pageable)).thenReturn(page);
+        when(vehicleRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), eq(pageable))).thenReturn(page);
         when(vehicleMapper.toDTO(vehicleEntity)).thenReturn(responseDTO);
 
-        Page<VehicleResponseDTO> result = vehicleService.findAll(1L, pageable);
+        Page<VehicleResponseDTO> result = vehicleService.findAll(1L, "Toyota", pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getTotalElements()).isEqualTo(1);
-        verify(vehicleRepository, times(1)).findByDealerId(1L, pageable);
+        verify(vehicleRepository, times(1)).findAll(any(org.springframework.data.jpa.domain.Specification.class), eq(pageable));
     }
 
     @Test
@@ -302,6 +303,6 @@ class VehicleServiceTest {
         assertThatThrownBy(() -> vehicleService.delete(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
 
-        verify(vehicleRepository, never()).delete(any());
+        verify(vehicleRepository, never()).delete(any(Vehicle.class));
     }
 }

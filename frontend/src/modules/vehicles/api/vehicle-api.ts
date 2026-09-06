@@ -4,6 +4,7 @@ import type { PageResponse, PageParams } from "@/shared/types/api";
 
 export interface VehicleQueryParams extends PageParams {
   dealerId?: number;
+  search?: string;
 }
 
 export const vehicleApi = {
@@ -14,6 +15,7 @@ export const vehicleApi = {
         size: params?.size ?? 10,
         sort: params?.sort ?? "id,asc",
         ...(params?.dealerId ? { dealerId: params.dealerId } : {}),
+        ...(params?.search?.trim() ? { search: params.search.trim() } : {}),
       },
     });
     return data;

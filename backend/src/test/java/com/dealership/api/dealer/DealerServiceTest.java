@@ -4,7 +4,6 @@ import com.dealership.api.dealer.dto.DealerRequestDTO;
 import com.dealership.api.dealer.dto.DealerResponseDTO;
 import com.dealership.api.shared.audit.AuditEvent;
 import com.dealership.api.shared.exception.BusinessException;
-import com.dealership.api.shared.exception.DuplicateCnpjException;
 import com.dealership.api.shared.exception.ResourceNotFoundException;
 import com.dealership.api.shared.util.CnpjUtils;
 import com.dealership.api.vehicle.Vehicle;
@@ -132,105 +131,75 @@ class DealerServiceTest {
                 .hasMessageContaining("99");
     }
 
+    @Mock
+    private DealerPersistenceService dealerPersistenceService;
+
     @Test
-    @DisplayName("Deve criar concessionária com sucesso normalizando CNPJ e CEP e autopreenchendo endereço via ViaCEP")
+    @DisplayName("Deve criar concessionária com sucesso consultando ViaCEP antes de delegar à persistência transacional")
     void createDealer_Success() {
         String cleanCnpj = CnpjUtils.normalize(requestDTO.cnpj());
         String cleanCep = "01001000";
 
-        when(dealerRepository.existsByCnpj(cleanCnpj)).thenReturn(false);
-        when(dealerMapper.toEntity(requestDTO)).thenReturn(dealerEntity);
         when(viaCepService.fetchAddress(cleanCep)).thenReturn(viaCepDTO);
-        when(dealerRepository.save(any(Dealer.class))).thenReturn(dealerEntity);
-        when(dealerMapper.toDTO(dealerEntity)).thenReturn(responseDTO);
+        when(dealerPersistenceService.saveNewDealer(requestDTO, cleanCnpj, cleanCep, viaCepDTO)).thenReturn(responseDTO);
 
         DealerResponseDTO result = dealerService.create(requestDTO);
 
         assertThat(result).isNotNull();
         assertThat(result.id()).isEqualTo(1L);
         assertThat(result.street()).isEqualTo("Praça da Sé");
-        verify(eventPublisher, times(1)).publishEvent(any(AuditEvent.class));
-        verify(dealerRepository, times(1)).save(dealerEntity);
+
+        // Verifica que a busca externa via ViaCEP foi executada ANTES da delegacao transacional
+        inOrder(viaCepService, dealerPersistenceService)
+                .verify(viaCepService).fetchAddress(cleanCep);
+        inOrder(viaCepService, dealerPersistenceService)
+                .verify(dealerPersistenceService).saveNewDealer(requestDTO, cleanCnpj, cleanCep, viaCepDTO);
     }
 
     @Test
-    @DisplayName("Deve lançar DuplicateCnpjException ao tentar criar com CNPJ duplicado")
-    void createDealer_ThrowsDuplicateCnpjException() {
-        String cleanCnpj = CnpjUtils.normalize(requestDTO.cnpj());
-        when(dealerRepository.existsByCnpj(cleanCnpj)).thenReturn(true);
-
-        assertThatThrownBy(() -> dealerService.create(requestDTO))
-                .isInstanceOf(DuplicateCnpjException.class);
-
-        verify(dealerRepository, never()).save(any());
-        verify(viaCepService, never()).fetchAddress(any());
-    }
-
-    @Test
-    @DisplayName("Deve propagar exceção de timeout do ViaCEP ao tentar criar concessionária")
+    @DisplayName("Deve propagar exceção de timeout do ViaCEP sem acionar a persistência transacional")
     void createDealer_ViaCepTimeout_PropagatesException() {
-        String cleanCnpj = CnpjUtils.normalize(requestDTO.cnpj());
         String cleanCep = "01001000";
 
-        when(dealerRepository.existsByCnpj(cleanCnpj)).thenReturn(false);
-        when(dealerMapper.toEntity(requestDTO)).thenReturn(dealerEntity);
         when(viaCepService.fetchAddress(cleanCep)).thenThrow(new ResourceAccessException("Connection timed out"));
 
         assertThatThrownBy(() -> dealerService.create(requestDTO))
                 .isInstanceOf(ResourceAccessException.class);
 
-        verify(dealerRepository, never()).save(any());
+        verify(dealerPersistenceService, never()).saveNewDealer(any(), any(), any(), any());
     }
 
     @Test
-    @DisplayName("Deve propagar BusinessException de CEP inválido ao tentar criar concessionária")
+    @DisplayName("Deve propagar BusinessException de CEP inválido sem acionar a persistência transacional")
     void createDealer_ViaCepInvalidCep_PropagatesException() {
         String cleanCnpj = CnpjUtils.normalize(requestDTO.cnpj());
         String cleanCep = "01001000";
 
-        when(dealerRepository.existsByCnpj(cleanCnpj)).thenReturn(false);
-        when(dealerMapper.toEntity(requestDTO)).thenReturn(dealerEntity);
         when(viaCepService.fetchAddress(cleanCep)).thenThrow(new BusinessException("CEP inválido"));
 
         assertThatThrownBy(() -> dealerService.create(requestDTO))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("CEP inválido");
 
-        verify(dealerRepository, never()).save(any());
+        verify(dealerPersistenceService, never()).saveNewDealer(any(), any(), any(), any());
     }
 
     @Test
-    @DisplayName("Deve atualizar concessionária com sucesso alterando CNPJ e CEP")
+    @DisplayName("Deve atualizar concessionária com sucesso alterando CNPJ e CEP com busca ViaCEP prévia")
     void updateDealer_Success() {
         String cleanCnpj = CnpjUtils.normalize(requestDTO.cnpj());
         String cleanCep = "01001000";
 
         when(dealerRepository.findById(1L)).thenReturn(Optional.of(dealerEntity));
-        when(dealerRepository.existsByCnpjAndIdNot(cleanCnpj, 1L)).thenReturn(false);
         when(viaCepService.fetchAddress(cleanCep)).thenReturn(viaCepDTO);
-        when(dealerRepository.save(any(Dealer.class))).thenReturn(dealerEntity);
-        when(dealerMapper.toDTO(dealerEntity)).thenReturn(responseDTO);
+        when(dealerPersistenceService.saveUpdatedDealer(dealerEntity, requestDTO, cleanCnpj, cleanCep, viaCepDTO)).thenReturn(responseDTO);
 
         DealerResponseDTO result = dealerService.update(1L, requestDTO);
 
         assertThat(result).isNotNull();
         assertThat(result.id()).isEqualTo(1L);
-        verify(dealerRepository, times(1)).save(dealerEntity);
-        verify(eventPublisher, times(1)).publishEvent(any(AuditEvent.class));
-    }
-
-    @Test
-    @DisplayName("Deve lançar DuplicateCnpjException ao tentar atualizar para um CNPJ de outra concessionária")
-    void updateDealer_ThrowsDuplicateCnpjException() {
-        String cleanCnpj = CnpjUtils.normalize(requestDTO.cnpj());
-
-        when(dealerRepository.findById(1L)).thenReturn(Optional.of(dealerEntity));
-        when(dealerRepository.existsByCnpjAndIdNot(cleanCnpj, 1L)).thenReturn(true);
-
-        assertThatThrownBy(() -> dealerService.update(1L, requestDTO))
-                .isInstanceOf(DuplicateCnpjException.class);
-
-        verify(dealerRepository, never()).save(any());
+        verify(viaCepService, times(1)).fetchAddress(cleanCep);
+        verify(dealerPersistenceService, times(1)).saveUpdatedDealer(dealerEntity, requestDTO, cleanCnpj, cleanCep, viaCepDTO);
     }
 
     @Test

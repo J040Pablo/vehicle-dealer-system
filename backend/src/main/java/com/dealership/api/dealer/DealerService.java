@@ -27,6 +27,7 @@ public class DealerService {
     private final DealerRepository dealerRepository;
     private final DealerMapper dealerMapper;
     private final ViaCepService viaCepService;
+    private final DealerPersistenceService dealerPersistenceService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
@@ -48,76 +49,32 @@ public class DealerService {
         return dealerMapper.toDTO(dealer);
     }
 
-    @Transactional
     public DealerResponseDTO create(DealerRequestDTO dto) {
         String cleanCnpj = CnpjUtils.normalize(dto.cnpj());
         String cleanCep = CepUtils.normalize(dto.cep());
 
-        log.info("Iniciando cadastro de concessionária: CNPJ={}", cleanCnpj);
+        log.info("Iniciando busca externa ViaCEP para cadastro de concessionária: CNPJ={}", cleanCnpj);
 
-        if (dealerRepository.existsByCnpj(cleanCnpj)) {
-            throw new DuplicateCnpjException(cleanCnpj);
-        }
-
-        Dealer dealer = dealerMapper.toEntity(dto);
-        dealer.setCnpj(cleanCnpj);
-        dealer.setCep(cleanCep);
-
-        // Preenchimento de endereço via ViaCEP no backend
+        // 1. Busca externa ViaCEP executada FORA da transação de banco de dados
         ViaCepResponseDTO addressDTO = viaCepService.fetchAddress(cleanCep);
-        dealer.setStreet(addressDTO.street());
-        dealer.setNeighborhood(addressDTO.neighborhood());
-        dealer.setCity(addressDTO.city());
-        dealer.setState(addressDTO.state());
 
-        Dealer saved = dealerRepository.save(dealer);
-        log.info("Concessionária criada com sucesso: ID={}", saved.getId());
-
-        // Disparo de Evento de Auditoria
-        eventPublisher.publishEvent(new AuditEvent(
-                "DEALER",
-                saved.getId(),
-                "CREATE",
-                "Created Dealer: " + saved.getName() + " (CNPJ: " + saved.getCnpj() + ")"));
-
-        return dealerMapper.toDTO(saved);
+        // 2. Transação iniciada estritamente para validação de banco e persistência
+        return dealerPersistenceService.saveNewDealer(dto, cleanCnpj, cleanCep, addressDTO);
     }
 
-    @Transactional
     public DealerResponseDTO update(Long id, DealerRequestDTO dto) {
         String cleanCnpj = CnpjUtils.normalize(dto.cnpj());
         String cleanCep = CepUtils.normalize(dto.cep());
 
-        log.info("Atualizando concessionária: ID={}", id);
+        log.info("Atualizando concessionária com busca externa ViaCEP: ID={}", id);
 
         Dealer dealer = getDealerEntity(id);
 
-        if (dealerRepository.existsByCnpjAndIdNot(cleanCnpj, id)) {
-            throw new DuplicateCnpjException(cleanCnpj);
-        }
-
-        dealerMapper.updateEntityFromDTO(dto, dealer);
-        dealer.setCnpj(cleanCnpj);
-        dealer.setCep(cleanCep);
-
-        // Atualização de endereço caso o CEP tenha mudado ou precise revalidar
+        // 1. Busca externa ViaCEP executada FORA da transação de banco de dados
         ViaCepResponseDTO addressDTO = viaCepService.fetchAddress(cleanCep);
-        dealer.setStreet(addressDTO.street());
-        dealer.setNeighborhood(addressDTO.neighborhood());
-        dealer.setCity(addressDTO.city());
-        dealer.setState(addressDTO.state());
 
-        Dealer updated = dealerRepository.save(dealer);
-        log.info("Concessionária atualizada com sucesso: ID={}", updated.getId());
-
-        // Disparo de Evento de Auditoria
-        eventPublisher.publishEvent(new AuditEvent(
-                "DEALER",
-                updated.getId(),
-                "UPDATE",
-                "Updated Dealer: " + updated.getName() + " (CNPJ: " + updated.getCnpj() + ")"));
-
-        return dealerMapper.toDTO(updated);
+        // 2. Transação iniciada estritamente para validação de banco e persistência
+        return dealerPersistenceService.saveUpdatedDealer(dealer, dto, cleanCnpj, cleanCep, addressDTO);
     }
 
     @Transactional

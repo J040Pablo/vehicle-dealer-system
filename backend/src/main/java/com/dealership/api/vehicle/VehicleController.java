@@ -23,11 +23,12 @@ public class VehicleController {
     private final VehicleService vehicleService;
 
     @GetMapping
-    @Operation(summary = "Listar veículos com paginação (filtro opcional por dealerId)")
+    @Operation(summary = "Listar veículos com paginação e busca textual (filtro opcional por dealerId e search)")
     public ResponseEntity<Page<VehicleResponseDTO>> findAll(
             @RequestParam(required = false) Long dealerId,
+            @RequestParam(required = false) String search,
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
-        return ResponseEntity.ok(vehicleService.findAll(dealerId, pageable));
+        return ResponseEntity.ok(vehicleService.findAll(dealerId, search, pageable));
     }
 
     @GetMapping("/{id}")

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Plus, AlertTriangle, Search, X } from "lucide-react";
 
 import { PageHeader } from "@/shared/components/page-header";
@@ -17,17 +17,21 @@ import { getErrorMessage } from "@/shared/api/error";
 export function VehiclesPage() {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
-  const { data: pageData, isLoading, isError, error } = useVehiclesPaginated(page, size);
+  // Reset to first page whenever search term changes
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch]);
 
-  const vehicles = pageData?.content;
+  const { data: pageData, isLoading, isError, error } = useVehiclesPaginated(page, size, debouncedSearch);
+
+  const vehicles = pageData?.content ?? [];
   const totalPages = pageData?.totalPages ?? 1;
   const totalElements = pageData?.totalElements ?? 0;
   const isFirst = pageData?.first;
   const isLast = pageData?.last;
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearch = useDebounce(searchTerm, 300);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
@@ -42,19 +46,6 @@ export function VehiclesPage() {
     setEditingVehicle(vehicle);
     setFormOpen(true);
   }
-
-  // Client-side filtering by brand, model, plate for the loaded page items
-  const filteredVehicles = useMemo(() => {
-    if (!vehicles) return [];
-    if (!debouncedSearch.trim()) return vehicles;
-    const query = debouncedSearch.toLowerCase().trim();
-    return vehicles.filter(
-      (v) =>
-        v.brand.toLowerCase().includes(query) ||
-        v.model.toLowerCase().includes(query) ||
-        v.plate.toLowerCase().includes(query)
-    );
-  }, [vehicles, debouncedSearch]);
 
   const isFiltered = debouncedSearch.trim().length > 0;
 
@@ -105,7 +96,7 @@ export function VehiclesPage() {
         </Alert>
       ) : (
         <VehicleTable
-          vehicles={filteredVehicles}
+          vehicles={vehicles}
           rawVehiclesCount={totalElements}
           isFiltered={isFiltered}
           onClearFilter={() => setSearchTerm("")}

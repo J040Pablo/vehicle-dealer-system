@@ -28,14 +28,15 @@ public class VehicleService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
-    public Page<VehicleResponseDTO> findAll(Long dealerId, Pageable pageable) {
-        if (dealerId != null) {
-            log.info("Buscando veículos da concessionária ID: {}", dealerId);
-            return vehicleRepository.findByDealerId(dealerId, pageable)
-                    .map(vehicleMapper::toDTO);
-        }
-        return vehicleRepository.findAll(pageable)
+    public Page<VehicleResponseDTO> findAll(Long dealerId, String search, Pageable pageable) {
+        log.info("Buscando veículos com filtro: dealerId={}, search={}", dealerId, search);
+        return vehicleRepository.findAll(VehicleSpecification.filter(dealerId, search), pageable)
                 .map(vehicleMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<VehicleResponseDTO> findAll(Long dealerId, Pageable pageable) {
+        return findAll(dealerId, null, pageable);
     }
 
     @Transactional(readOnly = true)
