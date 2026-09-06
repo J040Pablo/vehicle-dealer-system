@@ -140,7 +140,7 @@ class DealerServiceTest {
         String cleanCnpj = CnpjUtils.normalize(requestDTO.cnpj());
         String cleanCep = "01001000";
 
-        when(viaCepService.fetchAddress(cleanCep)).thenReturn(viaCepDTO);
+        when(viaCepService.fetchAddressOrFallback(cleanCep, requestDTO.street(), requestDTO.neighborhood(), requestDTO.city(), requestDTO.state())).thenReturn(viaCepDTO);
         when(dealerPersistenceService.saveNewDealer(requestDTO, cleanCnpj, cleanCep, viaCepDTO)).thenReturn(responseDTO);
 
         DealerResponseDTO result = dealerService.create(requestDTO);
@@ -151,7 +151,7 @@ class DealerServiceTest {
 
         // Verifica que a busca externa via ViaCEP foi executada ANTES da delegacao transacional
         inOrder(viaCepService, dealerPersistenceService)
-                .verify(viaCepService).fetchAddress(cleanCep);
+                .verify(viaCepService).fetchAddressOrFallback(cleanCep, requestDTO.street(), requestDTO.neighborhood(), requestDTO.city(), requestDTO.state());
         inOrder(viaCepService, dealerPersistenceService)
                 .verify(dealerPersistenceService).saveNewDealer(requestDTO, cleanCnpj, cleanCep, viaCepDTO);
     }
@@ -160,8 +160,8 @@ class DealerServiceTest {
     @DisplayName("Deve propagar exceção de timeout do ViaCEP sem acionar a persistência transacional")
     void createDealer_ViaCepTimeout_PropagatesException() {
         String cleanCep = "01001000";
-
-        when(viaCepService.fetchAddress(cleanCep)).thenThrow(new ResourceAccessException("Connection timed out"));
+        when(viaCepService.fetchAddressOrFallback(cleanCep, requestDTO.street(), requestDTO.neighborhood(), requestDTO.city(), requestDTO.state()))
+                .thenThrow(new ResourceAccessException("Connection timed out"));
 
         assertThatThrownBy(() -> dealerService.create(requestDTO))
                 .isInstanceOf(ResourceAccessException.class);
@@ -172,10 +172,9 @@ class DealerServiceTest {
     @Test
     @DisplayName("Deve propagar BusinessException de CEP inválido sem acionar a persistência transacional")
     void createDealer_ViaCepInvalidCep_PropagatesException() {
-        String cleanCnpj = CnpjUtils.normalize(requestDTO.cnpj());
         String cleanCep = "01001000";
-
-        when(viaCepService.fetchAddress(cleanCep)).thenThrow(new BusinessException("CEP inválido"));
+        when(viaCepService.fetchAddressOrFallback(cleanCep, requestDTO.street(), requestDTO.neighborhood(), requestDTO.city(), requestDTO.state()))
+                .thenThrow(new BusinessException("CEP inválido"));
 
         assertThatThrownBy(() -> dealerService.create(requestDTO))
                 .isInstanceOf(BusinessException.class)
@@ -191,14 +190,14 @@ class DealerServiceTest {
         String cleanCep = "01001000";
 
         when(dealerRepository.findById(1L)).thenReturn(Optional.of(dealerEntity));
-        when(viaCepService.fetchAddress(cleanCep)).thenReturn(viaCepDTO);
+        when(viaCepService.fetchAddressOrFallback(cleanCep, requestDTO.street(), requestDTO.neighborhood(), requestDTO.city(), requestDTO.state())).thenReturn(viaCepDTO);
         when(dealerPersistenceService.saveUpdatedDealer(dealerEntity, requestDTO, cleanCnpj, cleanCep, viaCepDTO)).thenReturn(responseDTO);
 
         DealerResponseDTO result = dealerService.update(1L, requestDTO);
 
         assertThat(result).isNotNull();
         assertThat(result.id()).isEqualTo(1L);
-        verify(viaCepService, times(1)).fetchAddress(cleanCep);
+        verify(viaCepService, times(1)).fetchAddressOrFallback(cleanCep, requestDTO.street(), requestDTO.neighborhood(), requestDTO.city(), requestDTO.state());
         verify(dealerPersistenceService, times(1)).saveUpdatedDealer(dealerEntity, requestDTO, cleanCnpj, cleanCep, viaCepDTO);
     }
 

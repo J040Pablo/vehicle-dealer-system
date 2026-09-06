@@ -10,6 +10,37 @@ export function maskCnpj(value: string): string {
     .replace(/(\d{4})(\d)/, "$1-$2");
 }
 
+/** Validates official CNPJ check digits (Receita Federal Módulo 11 algorithm). */
+export function isValidCnpj(rawCnpj: string): boolean {
+  if (!rawCnpj) return false;
+  const cnpj = rawCnpj.replace(/\D/g, "");
+  if (cnpj.length !== 14) return false;
+  if (/^(\d)\1{13}$/.test(cnpj)) return false;
+
+  try {
+    const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+      sum += parseInt(cnpj.charAt(i), 10) * weights1[i];
+    }
+    let remainder = sum % 11;
+    const digit1 = remainder < 2 ? 0 : 11 - remainder;
+    if (parseInt(cnpj.charAt(12), 10) !== digit1) return false;
+
+    const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    sum = 0;
+    for (let i = 0; i < 13; i++) {
+      sum += parseInt(cnpj.charAt(i), 10) * weights2[i];
+    }
+    remainder = sum % 11;
+    const digit2 = remainder < 2 ? 0 : 11 - remainder;
+
+    return parseInt(cnpj.charAt(13), 10) === digit2;
+  } catch {
+    return false;
+  }
+}
+
 /** Formats a string of digits as a CEP mask (XXXXX-XXX) as the user types. */
 export function maskCep(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 8);

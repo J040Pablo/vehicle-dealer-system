@@ -1,5 +1,6 @@
 package com.dealership.api.dealer.dto;
 
+import com.dealership.api.shared.validation.CNPJ;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
@@ -8,10 +9,20 @@ public record DealerRequestDTO(
         String name,
 
         @NotBlank(message = "O CNPJ é obrigatório.")
-        @Pattern(regexp = "^\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}$|^\\d{14}$", message = "O CNPJ deve estar no formato XX.XXX.XXX/XXXX-XX ou 14 dígitos numéricos.")
+        @CNPJ
         String cnpj,
 
         @NotBlank(message = "O CEP é obrigatório.")
         @Pattern(regexp = "^\\d{5}-?\\d{3}$", message = "O CEP deve estar no formato XXXXX-XXX ou 8 dígitos numéricos.")
-        String cep
-) {}
+        String cep,
+
+        // Campos opcionais para fallback de digitação manual de endereço
+        String street,
+        String neighborhood,
+        String city,
+        String state
+) {
+    public DealerRequestDTO(String name, String cnpj, String cep) {
+        this(name, cnpj, cep, null, null, null, null);
+    }
+}
