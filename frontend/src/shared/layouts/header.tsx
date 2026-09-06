@@ -6,6 +6,8 @@ import { Button } from "@/shared/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/shared/components/ui/sheet";
 import { Sidebar } from "@/shared/layouts/sidebar";
 
+import { useAuth } from "@/modules/auth/context/auth-context";
+
 interface RouteConfig {
   section: string;
   title: string;
@@ -20,11 +22,12 @@ const ROUTE_CONFIGS: Record<string, RouteConfig> = {
 export function Header() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { logout, user } = useAuth();
   const routeConfig = ROUTE_CONFIGS[pathname] ?? { section: "Sistema", title: "Vehicle Dealer" };
   const [mobileOpen, setMobileOpen] = useState(false);
 
   function handleLogout() {
-    localStorage.removeItem("token");
+    logout();
     navigate("/login");
   }
 

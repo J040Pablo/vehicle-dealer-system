@@ -2,19 +2,21 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { loginApi, registerApi } from "../api/auth-api";
 import type { LoginCredentials, RegisterCredentials, TokenResponse, UserResponse } from "../types/auth";
+import { useAuth } from "../context/auth-context";
 
 export function useLogin() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   return useMutation<TokenResponse, Error, LoginCredentials>({
     mutationFn: loginApi,
     onSuccess: (data) => {
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        login(data.token);
       }
       setTimeout(() => {
         navigate("/");
-      }, 1000);
+      }, 500);
     },
   });
 }
