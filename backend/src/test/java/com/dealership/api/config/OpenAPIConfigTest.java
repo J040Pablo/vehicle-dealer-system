@@ -17,6 +17,6 @@ class OpenAPIConfigTest {
         assertThat(openAPI).isNotNull();
         assertThat(openAPI.getInfo()).isNotNull();
         assertThat(openAPI.getInfo().getTitle()).isEqualTo("Vehicle & Dealer Management API");
-        assertThat(openAPI.getInfo().getVersion()).isEqualTo("2.0.0");
+        assertThat(openAPI.getInfo().getVersion()).isEqualTo("1.0.0");
     }
 }
