@@ -16,5 +16,11 @@ http.interceptors.request.use((config) => {
   if (!config.headers["X-Correlation-Id"]) {
     config.headers["X-Correlation-Id"] = crypto.randomUUID();
   }
+
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
+
   return config;
 });

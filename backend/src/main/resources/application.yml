@@ -58,3 +58,7 @@ springdoc:
     path: /swagger-ui.html
     operationsSorter: method
 
+jwt:
+  secret: ${JWT_SECRET:}
+  expiration: ${JWT_EXPIRATION:86400000}
+
