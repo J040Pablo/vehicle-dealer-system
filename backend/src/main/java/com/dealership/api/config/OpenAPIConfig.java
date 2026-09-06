@@ -27,8 +27,8 @@ public class OpenAPIConfig {
                                         .description("Informe o token JWT no formato: Bearer <token>")))
                 .info(new Info()
                         .title("Vehicle & Dealer Management API")
-                        .version("2.0.0")
-                        .description("API RESTful para gestão de veículos e concessionárias com Spring Security 6, JWT, busca textual server-side e rastreabilidade por Correlation ID.")
+                        .version("1.0.0")
+                        .description("API RESTful para gestão de veículos e concessionárias com Spring Security 6, JWT, busca textual server-side, auto-preenchimento ViaCEP e rastreabilidade por Correlation ID.")
                         .contact(new Contact()
                                 .name("Suporte Técnico")
                                 .email("dev@dealership.com")));
