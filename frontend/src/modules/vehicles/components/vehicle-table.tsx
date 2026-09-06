@@ -90,6 +90,7 @@ export function VehicleTable({
               <TableHead className="w-[150px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Modelo</TableHead>
               <TableHead className="w-[90px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ano</TableHead>
               <TableHead className="w-[120px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Placa</TableHead>
+              <TableHead className="w-[110px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cor</TableHead>
               <TableHead className="w-[130px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Combustível</TableHead>
               <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Concessionária</TableHead>
               <TableHead className="text-right w-[100px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ações</TableHead>
@@ -102,6 +103,7 @@ export function VehicleTable({
                 <TableCell className="text-foreground/90">{vehicle.model}</TableCell>
                 <TableCell className="text-muted-foreground">{vehicle.year}</TableCell>
                 <TableCell className="font-mono text-xs tracking-wider font-medium text-foreground/80">{vehicle.plate}</TableCell>
+                <TableCell className="text-xs text-foreground/90 font-medium">{vehicle.color || "-"}</TableCell>
                 <TableCell>
                   <FuelBadge fuelType={vehicle.fuelType} />
                 </TableCell>

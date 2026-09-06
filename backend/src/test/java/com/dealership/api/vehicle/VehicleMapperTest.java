@@ -21,7 +21,7 @@ class VehicleMapperTest {
     @Test
     @DisplayName("Deve mapear VehicleRequestDTO para Vehicle entity")
     void toEntity_Success() {
-        VehicleRequestDTO dto = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, 1L);
+        VehicleRequestDTO dto = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, 1L);
 
         Vehicle entity = vehicleMapper.toEntity(dto);
 
@@ -30,6 +30,7 @@ class VehicleMapperTest {
         assertThat(entity.getModel()).isEqualTo("Corolla");
         assertThat(entity.getYear()).isEqualTo(2024);
         assertThat(entity.getPlate()).isEqualTo("ABC1D23");
+        assertThat(entity.getColor()).isEqualTo("Preto");
         assertThat(entity.getFuelType()).isEqualTo(FuelType.FLEX);
     }
 
@@ -50,6 +51,7 @@ class VehicleMapperTest {
                 .model("Corolla")
                 .year(2024)
                 .plate("ABC1D23")
+                .color("Preto")
                 .fuelType(FuelType.FLEX)
                 .dealer(dealer)
                 .build();
@@ -58,6 +60,7 @@ class VehicleMapperTest {
 
         assertThat(dto).isNotNull();
         assertThat(dto.id()).isEqualTo(10L);
+        assertThat(dto.color()).isEqualTo("Preto");
         assertThat(dto.dealerId()).isEqualTo(1L);
         assertThat(dto.dealerName()).isEqualTo("Concessionária SP");
     }
@@ -71,6 +74,7 @@ class VehicleMapperTest {
                 .model("Corolla")
                 .year(2024)
                 .plate("ABC1D23")
+                .color("Prata")
                 .fuelType(FuelType.FLEX)
                 .dealer(null)
                 .build();
@@ -78,6 +82,7 @@ class VehicleMapperTest {
         VehicleResponseDTO dto = vehicleMapper.toDTO(entity);
 
         assertThat(dto).isNotNull();
+        assertThat(dto.color()).isEqualTo("Prata");
         assertThat(dto.dealerId()).isNull();
         assertThat(dto.dealerName()).isNull();
     }
@@ -92,13 +97,14 @@ class VehicleMapperTest {
     @Test
     @DisplayName("Deve atualizar Vehicle entity a partir de VehicleRequestDTO")
     void updateEntityFromDTO_Success() {
-        VehicleRequestDTO dto = new VehicleRequestDTO("Toyota", "Corolla Cross", 2025, "ABC1D23", FuelType.HIBRIDO, null);
-        Vehicle entity = Vehicle.builder().id(10L).brand("Toyota").model("Corolla").year(2024).build();
+        VehicleRequestDTO dto = new VehicleRequestDTO("Toyota", "Corolla Cross", 2025, "ABC1D23", "Branco", FuelType.HIBRIDO, null);
+        Vehicle entity = Vehicle.builder().id(10L).brand("Toyota").model("Corolla").year(2024).color("Preto").build();
 
         vehicleMapper.updateEntityFromDTO(dto, entity);
 
         assertThat(entity.getModel()).isEqualTo("Corolla Cross");
         assertThat(entity.getYear()).isEqualTo(2025);
+        assertThat(entity.getColor()).isEqualTo("Branco");
         assertThat(entity.getFuelType()).isEqualTo(FuelType.HIBRIDO);
     }
 

@@ -55,18 +55,19 @@ class VehicleServiceTest {
     @BeforeEach
     void setUp() {
         dealerEntity = Dealer.builder().id(1L).name("Concessionária SP").build();
-        requestDTO = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, 1L);
+        requestDTO = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, 1L);
         vehicleEntity = Vehicle.builder()
                 .id(10L)
                 .brand("Toyota")
                 .model("Corolla")
                 .year(2024)
                 .plate("ABC1D23")
+                .color("Preto")
                 .fuelType(FuelType.FLEX)
                 .dealer(dealerEntity)
                 .build();
 
-        responseDTO = new VehicleResponseDTO(10L, "Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, 1L,
+        responseDTO = new VehicleResponseDTO(10L, "Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, 1L,
                 "Concessionária SP", null, null);
     }
 
@@ -169,17 +170,18 @@ class VehicleServiceTest {
     @Test
     @DisplayName("Deve cadastrar veículo com sucesso sem concessionária vinculada")
     void createVehicle_WithoutDealer_Success() {
-        VehicleRequestDTO dtoWithoutDealer = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, null);
+        VehicleRequestDTO dtoWithoutDealer = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, null);
         Vehicle vehicleWithoutDealer = Vehicle.builder()
                 .id(11L)
                 .brand("Toyota")
                 .model("Corolla")
                 .year(2024)
                 .plate("ABC1D23")
+                .color("Preto")
                 .fuelType(FuelType.FLEX)
                 .dealer(null)
                 .build();
-        VehicleResponseDTO responseWithoutDealer = new VehicleResponseDTO(11L, "Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, null, null, null, null);
+        VehicleResponseDTO responseWithoutDealer = new VehicleResponseDTO(11L, "Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, null, null, null, null);
 
         when(vehicleRepository.existsByPlate(dtoWithoutDealer.plate())).thenReturn(false);
         when(vehicleMapper.toEntity(dtoWithoutDealer)).thenReturn(vehicleWithoutDealer);
@@ -210,7 +212,7 @@ class VehicleServiceTest {
     @DisplayName("Deve atualizar veículo com sucesso trocando de concessionária")
     void updateVehicle_ChangeDealer_Success() {
         Dealer newDealer = Dealer.builder().id(2L).name("Concessionária RJ").build();
-        VehicleRequestDTO updateDTO = new VehicleRequestDTO("Toyota", "Corolla Cross", 2025, "ABC1D23", FuelType.HIBRIDO, 2L);
+        VehicleRequestDTO updateDTO = new VehicleRequestDTO("Toyota", "Corolla Cross", 2025, "ABC1D23", "Branco", FuelType.HIBRIDO, 2L);
 
         when(vehicleRepository.findById(10L)).thenReturn(Optional.of(vehicleEntity));
         when(vehicleRepository.existsByPlateAndIdNot(updateDTO.plate(), 10L)).thenReturn(false);
@@ -229,7 +231,7 @@ class VehicleServiceTest {
     @Test
     @DisplayName("Deve atualizar veículo removendo a concessionária vinculada")
     void updateVehicle_RemoveDealer_Success() {
-        VehicleRequestDTO updateDTO = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, null);
+        VehicleRequestDTO updateDTO = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, null);
 
         when(vehicleRepository.findById(10L)).thenReturn(Optional.of(vehicleEntity));
         when(vehicleRepository.existsByPlateAndIdNot(updateDTO.plate(), 10L)).thenReturn(false);

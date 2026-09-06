@@ -26,8 +26,9 @@ public class VehicleSpecification {
                 Predicate brandPredicate = cb.like(cb.lower(root.get("brand")), searchPattern);
                 Predicate modelPredicate = cb.like(cb.lower(root.get("model")), searchPattern);
                 Predicate platePredicate = cb.like(cb.lower(root.get("plate")), searchPattern);
+                Predicate colorPredicate = cb.like(cb.lower(root.get("color")), searchPattern);
 
-                predicates.add(cb.or(brandPredicate, modelPredicate, platePredicate));
+                predicates.add(cb.or(brandPredicate, modelPredicate, platePredicate, colorPredicate));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

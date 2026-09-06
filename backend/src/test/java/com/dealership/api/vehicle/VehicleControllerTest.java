@@ -1,7 +1,6 @@
 package com.dealership.api.vehicle;
 
 import com.dealership.api.config.CorsProperties;
-import com.dealership.api.security.JwtAuthenticationFilter;
 import com.dealership.api.shared.exception.DuplicatePlateException;
 import com.dealership.api.shared.exception.GlobalExceptionHandler;
 import com.dealership.api.shared.exception.ResourceNotFoundException;
@@ -12,9 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -32,8 +28,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = VehicleController.class, excludeAutoConfiguration = {SecurityAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class})
-@AutoConfigureMockMvc(addFilters = false)
+@WebMvcTest(VehicleController.class)
 @Import(GlobalExceptionHandler.class)
 class VehicleControllerTest {
 
@@ -49,16 +44,13 @@ class VehicleControllerTest {
     @MockBean
     private CorsProperties corsProperties;
 
-    @MockBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
     private VehicleRequestDTO requestDTO;
     private VehicleResponseDTO responseDTO;
 
     @BeforeEach
     void setUp() {
-        requestDTO = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, 1L);
-        responseDTO = new VehicleResponseDTO(10L, "Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, 1L,
+        requestDTO = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, 1L);
+        responseDTO = new VehicleResponseDTO(10L, "Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, 1L,
                 "Concessionária SP", null, null);
     }
 

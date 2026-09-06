@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidCnpj } from "@/shared/utils/formatters";
 
 export const dealerSchema = z.object({
   name: z.string().trim().min(1, "A Razão Social / Nome da concessionária é obrigatório."),
@@ -9,12 +10,17 @@ export const dealerSchema = z.object({
     .regex(
       /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$|^\d{14}$/,
       "O CNPJ deve estar no formato XX.XXX.XXX/XXXX-XX ou 14 dígitos numéricos."
-    ),
+    )
+    .refine(isValidCnpj, "CNPJ inválido (dígitos verificadores incorretos)."),
   cep: z
     .string()
     .trim()
     .min(1, "O CEP é obrigatório.")
     .regex(/^\d{5}-?\d{3}$/, "O CEP deve estar no formato XXXXX-XXX ou 8 dígitos numéricos."),
+  street: z.string().optional(),
+  neighborhood: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
 });
 
 export type DealerFormValues = z.infer<typeof dealerSchema>;

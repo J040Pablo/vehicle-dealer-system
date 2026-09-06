@@ -59,6 +59,7 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
             model: vehicle.model,
             year: vehicle.year,
             plate: vehicle.plate,
+            color: vehicle.color || "",
             fuelType: vehicle.fuelType,
             dealerId: vehicle.dealerId,
           }
@@ -164,6 +165,20 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="color"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cor</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Preto, Prata, Branco..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

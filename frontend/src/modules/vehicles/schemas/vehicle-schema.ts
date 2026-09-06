@@ -15,6 +15,7 @@ export const vehicleSchema = z.object({
     .trim()
     .min(1, "A placa do veículo é obrigatória.")
     .transform((value) => value.toUpperCase()),
+  color: z.string().trim().min(1, "A cor do veículo é obrigatória."),
   fuelType: z.enum(["GASOLINA", "ETANOL", "FLEX", "DIESEL", "ELETRICO", "HIBRIDO"], {
     errorMap: () => ({ message: "Selecione o tipo de combustível." }),
   }),
@@ -28,6 +29,7 @@ export const vehicleFormDefaults: VehicleFormValues = {
   model: "",
   year: CURRENT_YEAR,
   plate: "",
+  color: "",
   fuelType: "FLEX",
   dealerId: null,
 };

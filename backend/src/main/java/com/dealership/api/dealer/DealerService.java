@@ -55,8 +55,10 @@ public class DealerService {
 
         log.info("Iniciando busca externa ViaCEP para cadastro de concessionária: CNPJ={}", cleanCnpj);
 
-        // 1. Busca externa ViaCEP executada FORA da transação de banco de dados
-        ViaCepResponseDTO addressDTO = viaCepService.fetchAddress(cleanCep);
+        // 1. Busca externa ViaCEP com fallback manual executada FORA da transação
+        ViaCepResponseDTO addressDTO = viaCepService.fetchAddressOrFallback(
+                cleanCep, dto.street(), dto.neighborhood(), dto.city(), dto.state()
+        );
 
         // 2. Transação iniciada estritamente para validação de banco e persistência
         return dealerPersistenceService.saveNewDealer(dto, cleanCnpj, cleanCep, addressDTO);
@@ -70,8 +72,10 @@ public class DealerService {
 
         Dealer dealer = getDealerEntity(id);
 
-        // 1. Busca externa ViaCEP executada FORA da transação de banco de dados
-        ViaCepResponseDTO addressDTO = viaCepService.fetchAddress(cleanCep);
+        // 1. Busca externa ViaCEP com fallback manual executada FORA da transação
+        ViaCepResponseDTO addressDTO = viaCepService.fetchAddressOrFallback(
+                cleanCep, dto.street(), dto.neighborhood(), dto.city(), dto.state()
+        );
 
         // 2. Transação iniciada estritamente para validação de banco e persistência
         return dealerPersistenceService.saveUpdatedDealer(dealer, dto, cleanCnpj, cleanCep, addressDTO);

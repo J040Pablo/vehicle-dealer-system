@@ -137,10 +137,70 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
                 )}
               />
             </div>
-            
-            <FormDescription className="text-xs text-muted-foreground">
-              O CEP é utilizado para buscar o endereço via integração com a API ViaCEP no backend.
-            </FormDescription>
+
+            <div className="space-y-3 pt-1 border-t border-border/50">
+              <FormDescription className="text-xs text-muted-foreground">
+                O endereço é buscado automaticamente via ViaCEP. Caso o serviço esteja indisponível ou o CEP não seja localizado, preencha os campos abaixo:
+              </FormDescription>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <FormField
+                  control={form.control}
+                  name="street"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Logradouro (opcional/fallback)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Rua / Avenida" className="h-9 text-xs" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="neighborhood"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Bairro (opcional/fallback)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Bairro" className="h-9 text-xs" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel className="text-xs">Cidade (opcional/fallback)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="São Paulo" className="h-9 text-xs" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">UF</FormLabel>
+                      <FormControl>
+                        <Input placeholder="SP" maxLength={2} className="h-9 text-xs uppercase" {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value.toUpperCase())} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             <DialogFooter className="pt-2 gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
