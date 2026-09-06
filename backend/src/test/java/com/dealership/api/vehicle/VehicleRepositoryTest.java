@@ -45,6 +45,7 @@ class VehicleRepositoryTest {
                 .model("Corolla")
                 .year(2024)
                 .plate("ABC1D23")
+                .color("Preto")
                 .fuelType(FuelType.FLEX)
                 .dealer(dealer)
                 .build();

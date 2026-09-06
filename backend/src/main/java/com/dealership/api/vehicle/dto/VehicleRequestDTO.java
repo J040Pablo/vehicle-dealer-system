@@ -19,6 +19,9 @@ public record VehicleRequestDTO(
         @NotBlank(message = "A placa do veículo é obrigatória.")
         String plate,
 
+        @NotBlank(message = "A cor do veículo é obrigatória.")
+        String color,
+
         @NotNull(message = "O tipo de combustível é obrigatório.")
         FuelType fuelType,
 

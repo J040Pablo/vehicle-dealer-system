@@ -6,6 +6,7 @@ export interface Vehicle {
   model: string;
   year: number;
   plate: string;
+  color: string;
   fuelType: FuelType;
   dealerId: number | null;
   dealerName: string | null;
@@ -18,6 +19,7 @@ export interface VehicleInput {
   model: string;
   year: number;
   plate: string;
+  color: string;
   fuelType: FuelType;
   dealerId: number | null;
 }

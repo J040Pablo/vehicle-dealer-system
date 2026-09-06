@@ -22,6 +22,7 @@ class VehicleEntityTest {
                 .model("Corolla")
                 .year(2024)
                 .plate("ABC1D23")
+                .color("Preto")
                 .fuelType(FuelType.FLEX)
                 .dealer(dealer)
                 .createdAt(now)
@@ -33,6 +34,7 @@ class VehicleEntityTest {
         assertThat(vehicle.getModel()).isEqualTo("Corolla");
         assertThat(vehicle.getYear()).isEqualTo(2024);
         assertThat(vehicle.getPlate()).isEqualTo("ABC1D23");
+        assertThat(vehicle.getColor()).isEqualTo("Preto");
         assertThat(vehicle.getFuelType()).isEqualTo(FuelType.FLEX);
         assertThat(vehicle.getDealer()).isEqualTo(dealer);
         assertThat(vehicle.getCreatedAt()).isEqualTo(now);
@@ -44,6 +46,7 @@ class VehicleEntityTest {
         vehicle.setModel("Civic");
         vehicle.setYear(2025);
         vehicle.setPlate("XYZ9E87");
+        vehicle.setColor("Prata");
         vehicle.setFuelType(FuelType.HIBRIDO);
         vehicle.setDealer(null);
         vehicle.setCreatedAt(now);
@@ -54,6 +57,7 @@ class VehicleEntityTest {
         assertThat(vehicle.getModel()).isEqualTo("Civic");
         assertThat(vehicle.getYear()).isEqualTo(2025);
         assertThat(vehicle.getPlate()).isEqualTo("XYZ9E87");
+        assertThat(vehicle.getColor()).isEqualTo("Prata");
         assertThat(vehicle.getFuelType()).isEqualTo(FuelType.HIBRIDO);
         assertThat(vehicle.getDealer()).isNull();
     }
@@ -64,7 +68,7 @@ class VehicleEntityTest {
         Vehicle noArgsVehicle = new Vehicle();
         assertThat(noArgsVehicle).isNotNull();
 
-        Vehicle allArgsVehicle = new Vehicle(10L, "Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, null, null, null);
+        Vehicle allArgsVehicle = new Vehicle(10L, "Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, null, null, null);
         assertThat(allArgsVehicle.getId()).isEqualTo(10L);
     }
 }

@@ -57,8 +57,8 @@ class VehicleControllerTest {
 
     @BeforeEach
     void setUp() {
-        requestDTO = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, 1L);
-        responseDTO = new VehicleResponseDTO(10L, "Toyota", "Corolla", 2024, "ABC1D23", FuelType.FLEX, 1L,
+        requestDTO = new VehicleRequestDTO("Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, 1L);
+        responseDTO = new VehicleResponseDTO(10L, "Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, 1L,
                 "Concessionária SP", null, null);
     }
 
