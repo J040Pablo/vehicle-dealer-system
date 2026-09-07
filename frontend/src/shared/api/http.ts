@@ -17,8 +17,11 @@ http.interceptors.request.use((config) => {
     config.headers["X-Correlation-Id"] = crypto.randomUUID();
   }
 
+  const isAuthEndpoint =
+    config.url?.startsWith("/auth/") || config.url?.startsWith("/api/auth/");
+
   const token = localStorage.getItem("token");
-  if (token) {
+  if (token && !isAuthEndpoint) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
 
@@ -37,3 +40,4 @@ http.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+

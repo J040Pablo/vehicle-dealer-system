@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Insere usuário admin padrão com senha 'admin123' criptografada em BCrypt
 INSERT INTO users (username, password, role)
-VALUES ('admin', '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.AQubh4a', 'ADMIN')
+VALUES ('admin', '$2a$10$28rF2003naGfCXhm5e1oJ.Jl1YiU7jUu.7ABCRxsgfcYgO/.SA472', 'ADMIN')
 ON CONFLICT (username) DO NOTHING;
