@@ -1,5 +1,6 @@
 # Vehicle Dealer System
 
+[![CI Pipeline](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/ci.yml/badge.svg)](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/ci.yml)
 ![Java 21](https://img.shields.io/badge/Java-21-007396?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
