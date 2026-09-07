@@ -59,6 +59,6 @@ springdoc:
     operationsSorter: method
 
 jwt:
-  secret: ${JWT_SECRET:}
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250655368566D5971}
   expiration: ${JWT_EXPIRATION:86400000}
 
