@@ -22,6 +22,7 @@ O **Vehicle Dealer System** é uma aplicação Full Stack projetada para central
 ## 🚀 Diferenciais Implementados
 
 * 🌐 **Integração Automática ViaCEP**: Busca e auto-preenchimento automatizado de logradouro, bairro, cidade e UF a partir do CEP informado, com mecanismo resiliente de fallback manual.
+* 📊 **Observabilidade Corporativa & Structured JSON Logging**: Emissão de logs JSON padronizados (com `timestamp`, `level`, `application`, `environment`, `logger`, `correlationId`, `message`, `exception`) compatíveis com **ELK**, **OpenSearch**, **Datadog** e **Loki**, além de rastreabilidade HTTP e eventos de negócio.
 * 🐳 **Conteinerização Total (Docker & Docker Compose)**: Orquestração completa de banco de dados PostgreSQL, API Backend e Frontend web com healthchecks automatizados.
 * 📚 **Documentação OpenAPI 3.0 (Swagger UI)**: Interface interativa para exploração e testes de todos os endpoints REST.
 * 🔐 **Segurança & Autenticação JWT**: Autenticação stateless via JSON Web Token assinado com HMAC-SHA256 e suporte a perfis de acesso (`ADMIN` e `USER`).
@@ -33,9 +34,10 @@ O **Vehicle Dealer System** é uma aplicação Full Stack projetada para central
 
 ### Backend
 * **Linguagem & Framework**: Java 21, Spring Boot 3.3.3
+* **Observabilidade & Logging**: Logback, `logstash-logback-encoder`, Spring Boot Actuator, MDC Correlation ID
 * **Segurança**: Spring Security 6, JWT (jjwt 0.12.6), BCrypt
 * **Persistência & Migrações**: Spring Data JPA, Hibernate, PostgreSQL 16, Flyway Migrations
-* **Ferramentas**: Maven, Lombok, MapStruct, OpenAPI/Swagger UI, Actuator
+* **Ferramentas**: Maven, Lombok, MapStruct, OpenAPI/Swagger UI
 
 ### Frontend
 * **Core**: React 18, TypeScript, Vite

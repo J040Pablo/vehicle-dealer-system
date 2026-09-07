@@ -74,7 +74,7 @@ public class VehicleService {
         }
 
         Vehicle saved = vehicleRepository.save(vehicle);
-        log.info("Veículo cadastrado com sucesso: ID={}", saved.getId());
+        log.info("Evento de negócio: operation=VEHICLE_CREATED entityId={} brand={} model={} plate={}", saved.getId(), saved.getBrand(), saved.getModel(), saved.getPlate());
 
         // Disparo de Evento de Auditoria
         eventPublisher.publishEvent(new AuditEvent(
@@ -92,6 +92,7 @@ public class VehicleService {
         log.info("Atualizando veículo: ID={}", id);
 
         Vehicle vehicle = getVehicleEntity(id);
+        Long previousDealerId = vehicle.getDealer() != null ? vehicle.getDealer().getId() : null;
 
         if (vehicleRepository.existsByPlateAndIdNot(dto.plate(), id)) {
             throw new DuplicatePlateException(dto.plate());
@@ -107,7 +108,15 @@ public class VehicleService {
         }
 
         Vehicle updated = vehicleRepository.save(vehicle);
-        log.info("Veículo atualizado com sucesso: ID={}", updated.getId());
+        log.info("Evento de negócio: operation=VEHICLE_UPDATED entityId={} brand={} model={} plate={}", updated.getId(), updated.getBrand(), updated.getModel(), updated.getPlate());
+
+        if (dto.dealerId() != null && !dto.dealerId().equals(previousDealerId)) {
+            if (previousDealerId != null) {
+                log.info("Evento de negócio: operation=VEHICLE_REASSIGNED entityId={} previousDealerId={} newDealerId={}", updated.getId(), previousDealerId, dto.dealerId());
+            } else {
+                log.info("Evento de negócio: operation=VEHICLE_ASSOCIATED entityId={} dealerId={}", updated.getId(), dto.dealerId());
+            }
+        }
 
         // Disparo de Evento de Auditoria
         eventPublisher.publishEvent(new AuditEvent(
@@ -125,10 +134,17 @@ public class VehicleService {
         log.info("Associando veículo ID={} à concessionária ID={}", vehicleId, dealerId);
 
         Vehicle vehicle = getVehicleEntity(vehicleId);
+        Long previousDealerId = vehicle.getDealer() != null ? vehicle.getDealer().getId() : null;
         Dealer dealer = dealerService.getDealerEntity(dealerId);
 
         vehicle.setDealer(dealer);
         Vehicle updated = vehicleRepository.save(vehicle);
+
+        if (previousDealerId != null && !previousDealerId.equals(dealerId)) {
+            log.info("Evento de negócio: operation=VEHICLE_REASSIGNED entityId={} previousDealerId={} newDealerId={}", vehicleId, previousDealerId, dealerId);
+        } else {
+            log.info("Evento de negócio: operation=VEHICLE_ASSOCIATED entityId={} dealerId={}", vehicleId, dealerId);
+        }
 
         eventPublisher.publishEvent(new AuditEvent(
                 "VEHICLE",
@@ -146,7 +162,7 @@ public class VehicleService {
         Vehicle vehicle = getVehicleEntity(id);
         vehicleRepository.delete(vehicle);
 
-        log.info("Veículo excluído com sucesso: ID={}", id);
+        log.info("Evento de negócio: operation=VEHICLE_DELETED entityId={}", id);
 
         // Disparo de Evento de Auditoria
         eventPublisher.publishEvent(new AuditEvent(

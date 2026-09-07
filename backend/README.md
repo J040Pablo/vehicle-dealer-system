@@ -244,15 +244,76 @@ A documentação interativa OpenAPI 3.0 é gerada dinamicamente pelo `springdoc-
 
 ---
 
-## 🔍 Rastreabilidade & Correlation ID
+## 📊 Observability Stack & Structured Logging
 
-1. O `CorrelationIdFilter` (`OncePerRequestFilter`) intercepta cada requisição HTTP recebida.
-2. Verifica a presença do cabeçalho `X-Correlation-Id`. Se ausente, gera um novo `UUID`.
-3. Adiciona o identificador no **MDC (Mapped Diagnostic Context)** do Slf4j e injeta o header de resposta `X-Correlation-Id`.
-4. Todos os logs gerados contêm o `correlationId` rastreável:
-   ```text
-   2026-09-06 20:33:35.093 [http-nio-8080-exec-1] [f81d4fae-7dec-11d0-a765-00a0c91e6bf6] INFO  c.d.a.s.AuthService - Login realizado com sucesso...
-   ```
+A arquitetura de observabilidade do **Vehicle Dealer System** foi projetada para suporte total a ambientes de produção e integração com ecossistemas APM/SIEM (**ELK Stack**, **OpenSearch**, **Datadog**, **Grafana Loki**).
+
+### Componentes da Stack
+
+- **Structured JSON Logging**: Emissão de logs em formato JSON estruturado via `logstash-logback-encoder` para o perfil `prod`.
+- **Correlation ID (MDC)**: Propagação automática de identificadores de requisição HTTP através do `CorrelationIdFilter`.
+- **Rastreabilidade HTTP**: Registro automatizado de início e conclusão de requisições HTTP (`method`, `path`, `status`, `durationMs`).
+- **Logs de Eventos de Negócio**: Rastreamento de operações do ciclo de vida dos domínios (`VEHICLE_CREATED`, `VEHICLE_UPDATED`, `DEALER_CREATED`, `VEHICLE_ASSOCIATED`, etc.).
+- **Spring Boot Actuator**: Monitoramento de integridade e métricas do sistema (`/api/actuator/health`).
+- **OpenAPI 3.0 / Swagger UI**: Documentação interativa e contratos de API (`/api/swagger-ui.html`).
+
+---
+
+### Modos de Execução por Profile
+
+#### 1. Desenvolvimento Local e Profile Padrão (`local` / `default`)
+Quando a aplicação é iniciada sem perfis específicos ou com `spring.profiles.active=local` (`mvn spring-boot:run`), os logs são emitidos no terminal em **formato legível (texto)**:
+
+```text
+2026-09-07 14:10:22.123 INFO  [6f9d1b5e-0d4a-42f8-a8d4-12d7c6c4d912] c.d.api.config.CorrelationIdFilter - Iniciando requisição HTTP: method=POST path=/api/vehicles
+2026-09-07 14:10:22.145 INFO  [6f9d1b5e-0d4a-42f8-a8d4-12d7c6c4d912] c.d.api.vehicle.VehicleService - Evento de negócio: operation=VEHICLE_CREATED entityId=42 brand=Toyota model=Corolla plate=ABC1D23
+2026-09-07 14:10:22.150 INFO  [6f9d1b5e-0d4a-42f8-a8d4-12d7c6c4d912] c.d.api.config.CorrelationIdFilter - Requisição HTTP concluída: method=POST path=/api/vehicles status=201 durationMs=27
+```
+
+#### 2. Ambiente de Produção (`prod`)
+Em ambiente de produção (`spring.profiles.active=prod`), o Logback alterna dinamicamente para saída **JSON em linha única** (`ConsoleAppender` e `RollingFileAppender` em `logs/app-json.log`).
+
+##### Exemplo Real de Log de Sucesso (JSON):
+```json
+{
+  "timestamp": "2026-09-07T14:10:22.145Z",
+  "level": "INFO",
+  "application": "vehicle-dealer-system",
+  "environment": "prod",
+  "logger": "com.dealership.api.vehicle.VehicleService",
+  "correlationId": "6f9d1b5e-0d4a-42f8-a8d4-12d7c6c4d912",
+  "message": "Evento de negócio: operation=VEHICLE_CREATED entityId=42 brand=Toyota model=Corolla plate=ABC1D23",
+  "exception": null
+}
+```
+
+##### Exemplo Real de Rastreabilidade HTTP (JSON):
+```json
+{
+  "timestamp": "2026-09-07T14:10:22.150Z",
+  "level": "INFO",
+  "application": "vehicle-dealer-system",
+  "environment": "prod",
+  "logger": "com.dealership.api.config.CorrelationIdFilter",
+  "correlationId": "6f9d1b5e-0d4a-42f8-a8d4-12d7c6c4d912",
+  "message": "Requisição HTTP concluída: method=POST path=/api/vehicles status=201 durationMs=27",
+  "exception": null
+}
+```
+
+##### Exemplo Real de Erro / Exceção Tratada (JSON):
+```json
+{
+  "timestamp": "2026-09-07T14:12:05.890Z",
+  "level": "ERROR",
+  "application": "vehicle-dealer-system",
+  "environment": "prod",
+  "logger": "com.dealership.api.shared.exception.GlobalExceptionHandler",
+  "correlationId": "8f12e1f4-7d5d-4f40-a2c4-0e21d1c4e5f1",
+  "message": "Erro de comunicação com serviço ViaCEP em /api/dealers: Read timed out",
+  "exception": "java.net.SocketTimeoutException: Read timed out\n\tat java.base/sun.nio.ch.NioSocketImpl.timedRead(NioSocketImpl.java:278)\n\tat com.dealership.api.viacep.ViaCepClient.fetchAddress(ViaCepClient.java:45)..."
+}
+```
 
 ---
 

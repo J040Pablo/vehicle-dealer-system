@@ -5,7 +5,7 @@ server:
 
 spring:
   application:
-    name: vehicle-dealer-api
+    name: vehicle-dealer-system
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/dealership_db}

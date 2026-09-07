@@ -93,7 +93,7 @@ public class DealerService {
         }
 
         dealerRepository.delete(dealer);
-        log.info("Concessionária excluída com sucesso: ID={}", id);
+        log.info("Evento de negócio: operation=DEALER_DELETED entityId={}", id);
 
         // Disparo de Evento de Auditoria
         eventPublisher.publishEvent(new AuditEvent(
