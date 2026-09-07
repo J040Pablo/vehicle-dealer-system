@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Check, AlertCircle, MapPin } from "lucide-react";
 
 import {
   Dialog,
@@ -19,10 +20,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/shared/components/ui/form";
 import { maskCep, maskCnpj } from "@/shared/utils/formatters";
 import { getFieldErrors } from "@/shared/api/error";
+import { useDebounce } from "@/shared/hooks/use-debounce";
+import { useCepLookup } from "@/shared/hooks/use-cep-lookup";
 import {
   dealerFormDefaults,
   dealerSchema,
@@ -48,12 +50,59 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
     defaultValues: dealerFormDefaults,
   });
 
+  const cepValue = form.watch("cep");
+  const debouncedCep = useDebounce(cepValue, 400);
+  const cleanCep = (debouncedCep || "").replace(/\D/g, "");
+  const hasFullCep = cleanCep.length === 8;
+
+  const {
+    data: cepData,
+    isLoading: isCepLoading,
+    isFetching: isCepFetching,
+    isError: isCepError,
+    error: cepError,
+    isSuccess: isCepSuccess,
+  } = useCepLookup(debouncedCep);
+
+  const isSearchingCep = isCepLoading || isCepFetching;
+  const isViaCepUnavailable = isCepError && cepError?.message !== "CEP não encontrado.";
+  const isCepNotFound = isCepError && cepError?.message === "CEP não encontrado.";
+
   useEffect(() => {
     if (!open) return;
     form.reset(
-      dealer ? { name: dealer.name, cnpj: dealer.cnpj, cep: dealer.cep } : dealerFormDefaults
+      dealer
+        ? {
+          name: dealer.name,
+          cnpj: dealer.cnpj,
+          cep: dealer.cep,
+          street: dealer.street || "",
+          neighborhood: dealer.neighborhood || "",
+          city: dealer.city || "",
+          state: dealer.state || "",
+        }
+        : dealerFormDefaults
     );
   }, [open, dealer, form]);
+
+  useEffect(() => {
+    if (isCepSuccess && cepData) {
+      form.setValue("street", cepData.street, { shouldValidate: true, shouldDirty: true });
+      form.setValue("neighborhood", cepData.neighborhood, { shouldValidate: true, shouldDirty: true });
+      form.setValue("city", cepData.city, { shouldValidate: true, shouldDirty: true });
+      form.setValue("state", cepData.state, { shouldValidate: true, shouldDirty: true });
+      form.clearErrors("cep");
+    }
+  }, [isCepSuccess, cepData, form]);
+
+  useEffect(() => {
+    if (isCepNotFound) {
+      form.setError("cep", {
+        type: "manual",
+        message: "CEP não encontrado. Verifique o número informado.",
+      });
+    }
+  }, [isCepNotFound, form]);
 
   async function onSubmit(values: DealerFormValues) {
     const input: DealerInput = { ...values };
@@ -80,7 +129,7 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
           <DialogDescription>
             {isEditMode
               ? "Atualize os dados cadastrais da concessionária."
-              : "O endereço é preenchido automaticamente a partir do CEP informado."}
+              : "Preencha as informações abaixo para cadastrar uma nova concessionária."}
           </DialogDescription>
         </DialogHeader>
 
@@ -93,7 +142,7 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
                 <FormItem>
                   <FormLabel>Razão Social</FormLabel>
                   <FormControl>
-                    <Input placeholder="Concessionária Exemplo Ltda." {...field} />
+                    <Input placeholder="Ex: Concessionária Central Ltda." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -109,7 +158,7 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
                     <FormLabel>CNPJ</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="XX.XXX.XXX/XXXX-XX"
+                        placeholder="00.000.000/0000-00"
                         {...field}
                         onChange={(e) => field.onChange(maskCnpj(e.target.value))}
                       />
@@ -126,11 +175,19 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
                   <FormItem>
                     <FormLabel>CEP</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="XXXXX-XXX"
-                        {...field}
-                        onChange={(e) => field.onChange(maskCep(e.target.value))}
-                      />
+                      <div className="relative">
+                        <Input
+                          placeholder="00000-000"
+                          {...field}
+                          onChange={(e) => field.onChange(maskCep(e.target.value))}
+                          aria-describedby="cep-status"
+                        />
+                        {isSearchingCep && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                          </div>
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,20 +195,54 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
               />
             </div>
 
-            <div className="space-y-3 pt-1 border-t border-border/50">
-              <FormDescription className="text-xs text-muted-foreground">
-                O endereço é buscado automaticamente via ViaCEP. Caso o serviço esteja indisponível ou o CEP não seja localizado, preencha os campos abaixo:
-              </FormDescription>
+            {/* CEP Feedback Status */}
+            <div id="cep-status" aria-live="polite" role="status">
+              {hasFullCep && isSearchingCep && (
+                <div className="flex items-center gap-1.5 text-xs text-primary font-medium py-1 px-2 rounded-md bg-primary/5">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Buscando endereço...</span>
+                </div>
+              )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {hasFullCep && isCepSuccess && cepData && (
+                <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium py-1 px-2 rounded-md bg-emerald-500/10 border border-emerald-500/20">
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Endereço encontrado</span>
+                </div>
+              )}
+
+              {isViaCepUnavailable && (
+                <div className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400 font-normal py-1.5 px-2.5 rounded-md bg-amber-500/10 border border-amber-500/20">
+                  <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <span>Não foi possível consultar o CEP agora. Você pode preencher o endereço manualmente.</span>
+                </div>
+              )}
+            </div>
+
+            {/* Grouped Address Section */}
+            <div className="rounded-xl border border-border/70 bg-muted/20 p-4 space-y-3.5">
+              <div className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span className="text-xs font-semibold text-foreground uppercase tracking-wide">Endereço</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Informe o CEP para preencher automaticamente o endereço. Caso necessário, você poderá editar os campos manualmente.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <FormField
                   control={form.control}
                   name="street"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">Logradouro (opcional/fallback)</FormLabel>
+                      <FormLabel className="text-xs">Logradouro</FormLabel>
                       <FormControl>
-                        <Input placeholder="Rua / Avenida" className="h-9 text-xs" {...field} value={field.value || ""} />
+                        <Input
+                          placeholder="Ex: Rua das Flores, 123"
+                          className="h-9 text-xs"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -162,9 +253,14 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
                   name="neighborhood"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">Bairro (opcional/fallback)</FormLabel>
+                      <FormLabel className="text-xs">Bairro</FormLabel>
                       <FormControl>
-                        <Input placeholder="Bairro" className="h-9 text-xs" {...field} value={field.value || ""} />
+                        <Input
+                          placeholder="Ex: Centro"
+                          className="h-9 text-xs"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -178,9 +274,14 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
                   name="city"
                   render={({ field }) => (
                     <FormItem className="col-span-2">
-                      <FormLabel className="text-xs">Cidade (opcional/fallback)</FormLabel>
+                      <FormLabel className="text-xs">Cidade</FormLabel>
                       <FormControl>
-                        <Input placeholder="São Paulo" className="h-9 text-xs" {...field} value={field.value || ""} />
+                        <Input
+                          placeholder="Ex: Feira de Santana"
+                          className="h-9 text-xs"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -191,9 +292,16 @@ export function DealerFormDialog({ open, onOpenChange, dealer }: DealerFormDialo
                   name="state"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs">UF</FormLabel>
+                      <FormLabel className="text-xs">Estado</FormLabel>
                       <FormControl>
-                        <Input placeholder="SP" maxLength={2} className="h-9 text-xs uppercase" {...field} value={field.value || ""} onChange={(e) => field.onChange(e.target.value.toUpperCase())} />
+                        <Input
+                          placeholder="Ex: BA"
+                          maxLength={2}
+                          className="h-9 text-xs uppercase"
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

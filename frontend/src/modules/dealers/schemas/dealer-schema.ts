@@ -29,4 +29,8 @@ export const dealerFormDefaults: DealerFormValues = {
   name: "",
   cnpj: "",
   cep: "",
+  street: "",
+  neighborhood: "",
+  city: "",
+  state: "",
 };
