@@ -1,6 +1,7 @@
 package com.dealership.api.vehicle;
 
 import com.dealership.api.dealer.Dealer;
+import com.dealership.api.shared.dto.PagedResponseDTO;
 import com.dealership.api.vehicle.dto.VehicleResponseDTO;
 import jakarta.persistence.EntityManager;
 import org.hibernate.SessionFactory;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +73,7 @@ class VehicleNPlusOneTest {
         stats.clear();
 
         // Execution of paged specification search (page size = 5, total elements = 10 -> triggers count query + data query = 2 queries)
-        Page<VehicleResponseDTO> result = vehicleService.findAll(
+        PagedResponseDTO<VehicleResponseDTO> result = vehicleService.findAll(
                 null,
                 null,
                 PageRequest.of(0, 5, Sort.by("id").ascending())
@@ -81,11 +81,11 @@ class VehicleNPlusOneTest {
 
         // 1. Validate page contents and size
         assertThat(result).isNotNull();
-        assertThat(result.getTotalElements()).isEqualTo(10);
-        assertThat(result.getContent()).hasSize(5);
+        assertThat(result.totalElements()).isEqualTo(10);
+        assertThat(result.content()).hasSize(5);
 
         // 2. Validate correct eager mapping of dealer details without triggering lazy queries
-        for (VehicleResponseDTO dto : result.getContent()) {
+        for (VehicleResponseDTO dto : result.content()) {
             assertThat(dto.dealerId()).isNotNull();
             assertThat(dto.dealerName()).startsWith("Concessionaria");
         }
@@ -134,16 +134,16 @@ class VehicleNPlusOneTest {
         stats.clear();
 
         // Page size = 2, total elements = 10 matching vehicles -> requires 2 queries (1 count + 1 fetch)
-        Page<VehicleResponseDTO> result = vehicleService.findAll(
+        PagedResponseDTO<VehicleResponseDTO> result = vehicleService.findAll(
                 null,
                 "Modelo",
                 PageRequest.of(0, 2)
         );
 
         assertThat(result).isNotNull();
-        assertThat(result.getTotalElements()).isEqualTo(10);
-        assertThat(result.getContent()).hasSize(2);
-        assertThat(result.getContent().get(0).dealerName()).isNotNull();
+        assertThat(result.totalElements()).isEqualTo(10);
+        assertThat(result.content()).hasSize(2);
+        assertThat(result.content().get(0).dealerName()).isNotNull();
 
         long statementCount = stats.getPrepareStatementCount();
         assertThat(statementCount)

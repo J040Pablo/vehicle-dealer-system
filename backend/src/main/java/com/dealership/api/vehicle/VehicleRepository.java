@@ -46,4 +46,9 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long>, JpaSpec
     boolean existsByPlateAndIdNot(String plate, Long id);
 
     Optional<Vehicle> findByPlate(String plate);
+
+    long countByDealerIsNull();
+
+    @org.springframework.data.jpa.repository.Query("SELECT v.fuelType, COUNT(v) FROM Vehicle v GROUP BY v.fuelType")
+    List<Object[]> countVehiclesByFuelType();
 }

@@ -6,13 +6,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.dealership.api.shared.dto.PagedResponseDTO;
 
 @RestController
 @RequestMapping("/vehicles")
@@ -24,7 +25,7 @@ public class VehicleController {
 
     @GetMapping
     @Operation(summary = "Listar veículos com paginação e busca textual (filtro opcional por dealerId e search)")
-    public ResponseEntity<Page<VehicleResponseDTO>> findAll(
+    public ResponseEntity<PagedResponseDTO<VehicleResponseDTO>> findAll(
             @RequestParam(required = false) Long dealerId,
             @RequestParam(required = false) String search,
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {

@@ -3,6 +3,7 @@ package com.dealership.api.dealer;
 import com.dealership.api.config.CorsProperties;
 import com.dealership.api.dealer.dto.DealerRequestDTO;
 import com.dealership.api.dealer.dto.DealerResponseDTO;
+import com.dealership.api.shared.dto.PagedResponseDTO;
 import com.dealership.api.security.JwtAuthenticationFilter;
 import com.dealership.api.shared.exception.DuplicateCnpjException;
 import com.dealership.api.shared.exception.GlobalExceptionHandler;
@@ -66,7 +67,7 @@ class DealerControllerTest {
     @DisplayName("GET /dealer - Deve retornar página de concessionárias com HTTP 200")
     void findAll_Success() throws Exception {
         PageImpl<DealerResponseDTO> page = new PageImpl<>(List.of(responseDTO), PageRequest.of(0, 10), 1);
-        when(dealerService.findAll(any(Pageable.class))).thenReturn(page);
+        when(dealerService.findAll(any(Pageable.class))).thenReturn(PagedResponseDTO.from(page));
 
         mockMvc.perform(get("/dealer")
                         .param("page", "0")
@@ -77,7 +78,7 @@ class DealerControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.totalPages").value(1))
                 .andExpect(jsonPath("$.size").value(10))
-                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.first").value(true));
 
         verify(dealerService, times(1)).findAll(any(Pageable.class));

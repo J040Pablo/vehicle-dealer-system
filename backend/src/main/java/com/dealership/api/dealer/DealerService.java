@@ -3,7 +3,7 @@ package com.dealership.api.dealer;
 import com.dealership.api.dealer.dto.DealerRequestDTO;
 import com.dealership.api.dealer.dto.DealerResponseDTO;
 import com.dealership.api.shared.audit.AuditEvent;
-import com.dealership.api.shared.exception.DuplicateCnpjException;
+
 import com.dealership.api.shared.exception.ResourceNotFoundException;
 import com.dealership.api.shared.util.CepUtils;
 import com.dealership.api.shared.util.CnpjUtils;
@@ -19,6 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import com.dealership.api.shared.dto.PagedResponseDTO;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,12 +36,15 @@ public class DealerService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
-    public Page<DealerResponseDTO> findAll(Pageable pageable) {
-        return dealerRepository.findAll(pageable)
+    @Cacheable(value = "dealers", key = "'dealers:page:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()", sync = true)
+    public PagedResponseDTO<DealerResponseDTO> findAll(Pageable pageable) {
+        Page<DealerResponseDTO> pageResult = dealerRepository.findAll(pageable)
                 .map(dealerMapper::toDTO);
+        return PagedResponseDTO.from(pageResult);
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "dealers", key = "'dealers:all'", sync = true)
     public List<DealerResponseDTO> findAll() {
         return dealerRepository.findAll().stream()
                 .map(dealerMapper::toDTO)
@@ -44,11 +52,17 @@ public class DealerService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "dealers", key = "'dealer:' + #id", sync = true)
     public DealerResponseDTO findById(Long id) {
         Dealer dealer = getDealerEntity(id);
         return dealerMapper.toDTO(dealer);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "dealers", allEntries = true),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public DealerResponseDTO create(DealerRequestDTO dto) {
         String cleanCnpj = CnpjUtils.normalize(dto.cnpj());
         String cleanCep = CepUtils.normalize(dto.cep());
@@ -57,13 +71,17 @@ public class DealerService {
 
         // 1. Busca externa ViaCEP com fallback manual executada FORA da transação
         ViaCepResponseDTO addressDTO = viaCepService.fetchAddressOrFallback(
-                cleanCep, dto.street(), dto.neighborhood(), dto.city(), dto.state()
-        );
+                cleanCep, dto.street(), dto.neighborhood(), dto.city(), dto.state());
 
         // 2. Transação iniciada estritamente para validação de banco e persistência
         return dealerPersistenceService.saveNewDealer(dto, cleanCnpj, cleanCep, addressDTO);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "dealers", allEntries = true),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public DealerResponseDTO update(Long id, DealerRequestDTO dto) {
         String cleanCnpj = CnpjUtils.normalize(dto.cnpj());
         String cleanCep = CepUtils.normalize(dto.cep());
@@ -74,14 +92,18 @@ public class DealerService {
 
         // 1. Busca externa ViaCEP com fallback manual executada FORA da transação
         ViaCepResponseDTO addressDTO = viaCepService.fetchAddressOrFallback(
-                cleanCep, dto.street(), dto.neighborhood(), dto.city(), dto.state()
-        );
+                cleanCep, dto.street(), dto.neighborhood(), dto.city(), dto.state());
 
         // 2. Transação iniciada estritamente para validação de banco e persistência
         return dealerPersistenceService.saveUpdatedDealer(dealer, dto, cleanCnpj, cleanCep, addressDTO);
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "dealers", allEntries = true),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public void delete(Long id) {
         log.info("Excluindo concessionária: ID={}", id);
 

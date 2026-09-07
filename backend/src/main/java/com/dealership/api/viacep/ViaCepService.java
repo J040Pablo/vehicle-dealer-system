@@ -6,6 +6,9 @@ import com.dealership.api.viacep.client.ViaCepClient;
 import com.dealership.api.viacep.dto.ViaCepResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -15,6 +18,15 @@ public class ViaCepService {
 
     private final ViaCepClient viaCepClient;
 
+    @Autowired
+    @Lazy
+    private ViaCepService self;
+
+    @Cacheable(
+            value = "viacep",
+            key = "T(com.dealership.api.shared.util.CepUtils).normalize(#rawCep)",
+            sync = true
+    )
     public ViaCepResponseDTO fetchAddress(String rawCep) {
         if (rawCep == null || rawCep.isBlank()) {
             throw new BusinessException("O CEP é obrigatório para o cadastro da concessionária.");
@@ -42,7 +54,8 @@ public class ViaCepService {
 
     public ViaCepResponseDTO fetchAddressOrFallback(String rawCep, String manualStreet, String manualNeighborhood, String manualCity, String manualState) {
         try {
-            return fetchAddress(rawCep);
+            ViaCepService proxy = (self != null) ? self : this;
+            return proxy.fetchAddress(rawCep);
         } catch (Exception e) {
             log.warn("Falha no serviço ViaCEP para CEP {}: {}. Verificando fallback manual.", rawCep, e.getMessage());
         }

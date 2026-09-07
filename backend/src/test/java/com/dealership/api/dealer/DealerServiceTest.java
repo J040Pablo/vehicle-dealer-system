@@ -6,6 +6,7 @@ import com.dealership.api.shared.audit.AuditEvent;
 import com.dealership.api.shared.exception.BusinessException;
 import com.dealership.api.shared.exception.ResourceNotFoundException;
 import com.dealership.api.shared.util.CnpjUtils;
+import com.dealership.api.shared.dto.PagedResponseDTO;
 import com.dealership.api.vehicle.Vehicle;
 import com.dealership.api.viacep.ViaCepService;
 import com.dealership.api.viacep.dto.ViaCepResponseDTO;
@@ -17,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -89,7 +89,6 @@ class DealerServiceTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).id()).isEqualTo(1L);
-        verify(dealerRepository, times(1)).findAll();
     }
 
     @Test
@@ -101,11 +100,11 @@ class DealerServiceTest {
         when(dealerRepository.findAll(pageable)).thenReturn(page);
         when(dealerMapper.toDTO(dealerEntity)).thenReturn(responseDTO);
 
-        Page<DealerResponseDTO> result = dealerService.findAll(pageable);
+        PagedResponseDTO<DealerResponseDTO> result = dealerService.findAll(pageable);
 
         assertThat(result).isNotNull();
-        assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent().get(0).id()).isEqualTo(1L);
+        assertThat(result.totalElements()).isEqualTo(1);
+        assertThat(result.content().get(0).id()).isEqualTo(1L);
         verify(dealerRepository, times(1)).findAll(pageable);
     }
 

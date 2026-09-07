@@ -5,6 +5,7 @@ import com.dealership.api.dealer.DealerService;
 import com.dealership.api.shared.audit.AuditEvent;
 import com.dealership.api.shared.exception.DuplicatePlateException;
 import com.dealership.api.shared.exception.ResourceNotFoundException;
+import com.dealership.api.shared.dto.PagedResponseDTO;
 import com.dealership.api.vehicle.dto.VehicleRequestDTO;
 import com.dealership.api.vehicle.dto.VehicleResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -93,10 +93,10 @@ class VehicleServiceTest {
         when(vehicleRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), eq(pageable))).thenReturn(page);
         when(vehicleMapper.toDTO(vehicleEntity)).thenReturn(responseDTO);
 
-        Page<VehicleResponseDTO> result = vehicleService.findAll(null, null, pageable);
+        PagedResponseDTO<VehicleResponseDTO> result = vehicleService.findAll(null, null, pageable);
 
         assertThat(result).isNotNull();
-        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.totalElements()).isEqualTo(1);
         verify(vehicleRepository, times(1)).findAll(any(org.springframework.data.jpa.domain.Specification.class), eq(pageable));
     }
 
@@ -109,10 +109,10 @@ class VehicleServiceTest {
         when(vehicleRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), eq(pageable))).thenReturn(page);
         when(vehicleMapper.toDTO(vehicleEntity)).thenReturn(responseDTO);
 
-        Page<VehicleResponseDTO> result = vehicleService.findAll(1L, "Toyota", pageable);
+        PagedResponseDTO<VehicleResponseDTO> result = vehicleService.findAll(1L, "Toyota", pageable);
 
         assertThat(result).isNotNull();
-        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.totalElements()).isEqualTo(1);
         verify(vehicleRepository, times(1)).findAll(any(org.springframework.data.jpa.domain.Specification.class), eq(pageable));
     }
 

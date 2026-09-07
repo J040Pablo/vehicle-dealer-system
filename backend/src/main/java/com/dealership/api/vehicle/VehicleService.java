@@ -11,6 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import com.dealership.api.shared.dto.PagedResponseDTO;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,14 +32,20 @@ public class VehicleService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
-    public Page<VehicleResponseDTO> findAll(Long dealerId, String search, Pageable pageable) {
+    @Cacheable(
+            value = "filters",
+            key = "'vehicles:' + (#dealerId != null ? #dealerId : 'all') + ':' + (#search != null && !#search.isBlank() ? #search.trim() : 'none') + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
+            sync = true
+    )
+    public PagedResponseDTO<VehicleResponseDTO> findAll(Long dealerId, String search, Pageable pageable) {
         log.info("Buscando veículos com filtro: dealerId={}, search={}", dealerId, search);
-        return vehicleRepository.findAll(VehicleSpecification.filter(dealerId, search), pageable)
+        Page<VehicleResponseDTO> pageResult = vehicleRepository.findAll(VehicleSpecification.filter(dealerId, search), pageable)
                 .map(vehicleMapper::toDTO);
+        return PagedResponseDTO.from(pageResult);
     }
 
     @Transactional(readOnly = true)
-    public Page<VehicleResponseDTO> findAll(Long dealerId, Pageable pageable) {
+    public PagedResponseDTO<VehicleResponseDTO> findAll(Long dealerId, Pageable pageable) {
         return findAll(dealerId, null, pageable);
     }
 
@@ -53,12 +63,17 @@ public class VehicleService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "vehicles", key = "'vehicle:' + #id", sync = true)
     public VehicleResponseDTO findById(Long id) {
         Vehicle vehicle = getVehicleEntity(id);
         return vehicleMapper.toDTO(vehicle);
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public VehicleResponseDTO create(VehicleRequestDTO dto) {
         log.info("Cadastrando veículo: Marca={} Modelo={} Placa={}", dto.brand(), dto.model(), dto.plate());
 
@@ -88,6 +103,11 @@ public class VehicleService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "vehicles", key = "'vehicle:' + #id"),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public VehicleResponseDTO update(Long id, VehicleRequestDTO dto) {
         log.info("Atualizando veículo: ID={}", id);
 
@@ -130,6 +150,11 @@ public class VehicleService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "vehicles", key = "'vehicle:' + #vehicleId"),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public VehicleResponseDTO associateDealer(Long vehicleId, Long dealerId) {
         log.info("Associando veículo ID={} à concessionária ID={}", vehicleId, dealerId);
 
@@ -156,6 +181,11 @@ public class VehicleService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "vehicles", key = "'vehicle:' + #id"),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public void delete(Long id) {
         log.info("Excluindo veículo: ID={}", id);
 
