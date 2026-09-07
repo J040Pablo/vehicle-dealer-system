@@ -1,6 +1,7 @@
 # Vehicle Dealer System
 
 [![Backend CI](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/backend-ci.yml)
+
 [![Frontend CI](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/frontend-ci.yml)
 
 Sistema corporativo para gestão de concessionárias e catálogo de veículos, desenvolvido como solução para Desafio Técnico Full Stack.
