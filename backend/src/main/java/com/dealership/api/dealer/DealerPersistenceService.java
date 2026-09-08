@@ -35,7 +35,7 @@ public class DealerPersistenceService {
         dealer.setState(addressDTO.state());
 
         Dealer saved = dealerRepository.save(dealer);
-        log.info("Concessionária criada com sucesso em transação: ID={}", saved.getId());
+        log.info("Evento de negócio: operation=DEALER_CREATED entityId={} name={} cnpj={}", saved.getId(), saved.getName(), saved.getCnpj());
 
         eventPublisher.publishEvent(new AuditEvent(
                 "DEALER",
@@ -61,7 +61,7 @@ public class DealerPersistenceService {
         dealer.setState(addressDTO.state());
 
         Dealer updated = dealerRepository.save(dealer);
-        log.info("Concessionária atualizada com sucesso em transação: ID={}", updated.getId());
+        log.info("Evento de negócio: operation=DEALER_UPDATED entityId={} name={} cnpj={}", updated.getId(), updated.getName(), updated.getCnpj());
 
         eventPublisher.publishEvent(new AuditEvent(
                 "DEALER",

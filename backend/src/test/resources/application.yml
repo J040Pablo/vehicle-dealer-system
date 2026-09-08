@@ -6,13 +6,18 @@ spring:
     password: ""
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
     hibernate:
       ddl-auto: create-drop
-    properties:
-      hibernate:
-        globally_quoted_identifiers: true
   flyway:
     enabled: false
+  cache:
+    type: simple
+
+management:
+  health:
+    redis:
+      enabled: false
 
 jwt:
   secret: 404E635266556A586E3272357538782F413F4428472B4B6250655368566D5971

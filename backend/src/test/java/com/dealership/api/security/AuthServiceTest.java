@@ -72,6 +72,31 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar BadCredentialsException quando senha estiver incorreta")
+    void login_InvalidPassword_ThrowsBadCredentialsException() {
+        LoginRequestDTO request = new LoginRequestDTO("testuser", "wrongpassword");
+
+        doThrow(new org.springframework.security.authentication.BadCredentialsException("Bad credentials"))
+                .when(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(org.springframework.security.authentication.BadCredentialsException.class)
+                .hasMessageContaining("Usuário ou senha incorretos.");
+    }
+
+    @Test
+    @DisplayName("Deve lançar BadCredentialsException quando usuário não for encontrado")
+    void login_UserNotFound_ThrowsBadCredentialsException() {
+        LoginRequestDTO request = new LoginRequestDTO("nonexistent", "password123");
+
+        when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(org.springframework.security.authentication.BadCredentialsException.class)
+                .hasMessageContaining("Usuário ou senha incorretos.");
+    }
+
+    @Test
     @DisplayName("Deve registrar novo usuário com sucesso")
     void register_Success() {
         RegisterRequestDTO request = new RegisterRequestDTO("newuser", "password123", Role.USER);
@@ -101,3 +126,4 @@ class AuthServiceTest {
         verify(userRepository, never()).save(any());
     }
 }
+

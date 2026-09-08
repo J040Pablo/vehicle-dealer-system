@@ -23,6 +23,10 @@ public interface DealerRepository extends JpaRepository<Dealer, Long> {
     @EntityGraph(attributePaths = {"vehicles"})
     List<Dealer> findAll();
 
+    @Override
+    @EntityGraph(attributePaths = {"vehicles"})
+    Optional<Dealer> findById(Long id);
+
     @Query("SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END FROM Dealer d WHERE d.cnpj = :cnpj")
     boolean rawExistsByCnpj(@Param("cnpj") String cnpj);
 

@@ -10,8 +10,10 @@ import com.dealership.api.user.dto.TokenResponseDTO;
 import com.dealership.api.user.dto.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,12 +30,17 @@ public class AuthService {
 
     public TokenResponseDTO login(LoginRequestDTO dto) {
         log.info("Tentativa de login para o usuário: {}", dto.username());
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(dto.username(), dto.password())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(dto.username(), dto.password())
+            );
+        } catch (AuthenticationException e) {
+            log.warn("Falha de autenticação para o usuário {}: {}", dto.username(), e.getMessage());
+            throw new BadCredentialsException("Usuário ou senha incorretos.");
+        }
 
         User user = userRepository.findByUsername(dto.username())
-                .orElseThrow(() -> new BusinessException("Usuário não encontrado."));
+                .orElseThrow(() -> new BadCredentialsException("Usuário ou senha incorretos."));
 
         String token = jwtService.generateToken(user);
         log.info("Login realizado com sucesso para o usuário: {}", dto.username());

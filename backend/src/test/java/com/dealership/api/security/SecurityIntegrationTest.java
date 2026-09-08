@@ -2,18 +2,25 @@ package com.dealership.api.security;
 
 import com.dealership.api.dealer.DealerService;
 import com.dealership.api.vehicle.VehicleService;
+import com.dealership.api.user.Role;
+import com.dealership.api.user.User;
+import com.dealership.api.user.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,11 +32,29 @@ class SecurityIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @MockBean
     private VehicleService vehicleService;
 
     @MockBean
     private DealerService dealerService;
+
+    @BeforeEach
+    void setUp() {
+        if (!userRepository.existsByUsername("admin")) {
+            User admin = User.builder()
+                    .username("admin")
+                    .password(passwordEncoder.encode("admin123"))
+                    .role(Role.ADMIN)
+                    .build();
+            userRepository.save(admin);
+        }
+    }
 
     @Test
     @DisplayName("Requisição sem token em endpoint protegido deve retornar 401 Unauthorized em formato ProblemDetail")
@@ -46,6 +71,40 @@ class SecurityIntegrationTest {
     void publicEndpoint_Health_ReturnsOk() throws Exception {
         mockMvc.perform(get("/actuator/health"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Login com credenciais válidas do admin deve retornar 200 OK e token JWT")
+    void login_ValidCredentials_Returns200AndToken() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"admin\",\"password\":\"admin123\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").exists());
+    }
+
+    @Test
+    @DisplayName("Login com senha incorreta deve retornar 401 Unauthorized em formato ProblemDetail (nunca 500)")
+    void login_InvalidPassword_Returns401ProblemDetail() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"admin\",\"password\":\"wrongpassword\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.title").value("Credenciais inválidas"))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.detail").value("Usuário ou senha incorretos."));
+    }
+
+    @Test
+    @DisplayName("Login com usuário inexistente deve retornar 401 Unauthorized em formato ProblemDetail (nunca 500)")
+    void login_NonExistentUser_Returns401ProblemDetail() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"nonexistent\",\"password\":\"admin123\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.title").value("Credenciais inválidas"))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.detail").value("Usuário ou senha incorretos."));
     }
 
     @Test
@@ -66,3 +125,4 @@ class SecurityIntegrationTest {
                 .andExpect(status().isNoContent());
     }
 }
+

@@ -6,13 +6,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.dealership.api.shared.dto.PagedResponseDTO;
 
 @RestController
 @RequestMapping("/dealer")
@@ -24,7 +25,7 @@ public class DealerController {
 
     @GetMapping
     @Operation(summary = "Listar concessionárias com paginação")
-    public ResponseEntity<Page<DealerResponseDTO>> findAll(
+    public ResponseEntity<PagedResponseDTO<DealerResponseDTO>> findAll(
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         return ResponseEntity.ok(dealerService.findAll(pageable));
     }

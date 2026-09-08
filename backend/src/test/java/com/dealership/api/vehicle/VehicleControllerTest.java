@@ -4,6 +4,7 @@ import com.dealership.api.config.CorsProperties;
 import com.dealership.api.shared.exception.DuplicatePlateException;
 import com.dealership.api.shared.exception.GlobalExceptionHandler;
 import com.dealership.api.shared.exception.ResourceNotFoundException;
+import com.dealership.api.shared.dto.PagedResponseDTO;
 import com.dealership.api.vehicle.dto.VehicleRequestDTO;
 import com.dealership.api.vehicle.dto.VehicleResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +29,13 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(VehicleController.class)
+import com.dealership.api.security.JwtAuthenticationFilter;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+
+@WebMvcTest(controllers = VehicleController.class, excludeAutoConfiguration = {SecurityAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class})
+@AutoConfigureMockMvc(addFilters = false)
 @Import(GlobalExceptionHandler.class)
 class VehicleControllerTest {
 
@@ -44,6 +51,9 @@ class VehicleControllerTest {
     @MockBean
     private CorsProperties corsProperties;
 
+    @MockBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
     private VehicleRequestDTO requestDTO;
     private VehicleResponseDTO responseDTO;
 
@@ -58,7 +68,7 @@ class VehicleControllerTest {
     @DisplayName("GET /vehicles - Deve listar página de veículos com HTTP 200")
     void findAll_WithoutDealerId_Success() throws Exception {
         PageImpl<VehicleResponseDTO> page = new PageImpl<>(List.of(responseDTO), PageRequest.of(0, 10), 1);
-        when(vehicleService.findAll(eq(null), eq(null), any(Pageable.class))).thenReturn(page);
+        when(vehicleService.findAll(eq(null), eq(null), any(Pageable.class))).thenReturn(PagedResponseDTO.from(page));
 
         mockMvc.perform(get("/vehicles"))
                 .andExpect(status().isOk())
@@ -74,7 +84,7 @@ class VehicleControllerTest {
     @DisplayName("GET /vehicles?dealerId=1&search=Civic - Deve listar veículos filtrados por concessionária e termo de busca com HTTP 200")
     void findAll_WithDealerIdAndSearch_Success() throws Exception {
         PageImpl<VehicleResponseDTO> page = new PageImpl<>(List.of(responseDTO), PageRequest.of(0, 10), 1);
-        when(vehicleService.findAll(eq(1L), eq("Civic"), any(Pageable.class))).thenReturn(page);
+        when(vehicleService.findAll(eq(1L), eq("Civic"), any(Pageable.class))).thenReturn(PagedResponseDTO.from(page));
 
         mockMvc.perform(get("/vehicles").param("dealerId", "1").param("search", "Civic"))
                 .andExpect(status().isOk())
