@@ -153,6 +153,8 @@ A aplicação inicializa o banco com a migração Flyway inserindo um usuário a
 * **Senha**: `admin123`
 * **Perfil**: `ADMIN`
 
+> ⚠️ **Aviso de Segurança (Produção):** A senha padrão do usuário `admin` (`admin123`) é estática e destinada **exclusivamente para ambientes locais de desenvolvimento e testes**. Em implantações de produção, altere a senha do usuário `admin` imediatamente.
+
 ---
 
 ## ✨ Funcionalidades Implementadas

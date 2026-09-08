@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/actuator/health"
                         ).permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/dealer/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/vehicles/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

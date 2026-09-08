@@ -19,3 +19,5 @@ CREATE UNIQUE INDEX idx_users_provider_id ON users(provider, provider_id) WHERE 
 INSERT INTO users (username, email, password, role, provider)
 VALUES ('admin', 'admin@dealership.com', '$2a$10$28rF2003naGfCXhm5e1oJ.Jl1YiU7jUu.7ABCRxsgfcYgO/.SA472', 'ADMIN', 'LOCAL')
 ON CONFLICT (username) DO NOTHING;
+
+

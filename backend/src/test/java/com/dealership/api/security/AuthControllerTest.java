@@ -70,7 +70,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("POST /auth/register deve cadastrar usuário com e-mail e retornar 201 Created")
     void register_ReturnsCreatedUser() throws Exception {
-        RegisterRequestDTO request = new RegisterRequestDTO("newuser", "newuser@example.com", "password123", Role.USER);
+        RegisterRequestDTO request = new RegisterRequestDTO("newuser", "newuser@example.com", "password123");
         UserResponseDTO response = new UserResponseDTO(1L, "newuser", "newuser@example.com", Role.USER);
 
         when(authService.register(any(RegisterRequestDTO.class))).thenReturn(response);

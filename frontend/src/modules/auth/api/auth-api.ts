@@ -11,7 +11,6 @@ export async function registerApi(credentials: RegisterCredentials): Promise<Use
     username: credentials.username,
     email: credentials.email,
     password: credentials.password,
-    role: "USER",
   });
   return response.data;
 }

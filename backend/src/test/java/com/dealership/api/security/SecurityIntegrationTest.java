@@ -142,5 +142,39 @@ class SecurityIntegrationTest {
         mockMvc.perform(delete("/dealer/1"))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    @WithMockUser(username = "user", roles = {"USER"})
+    @DisplayName("Usuário com Role USER tentando deletar veículo deve receber 403 Forbidden")
+    void deleteVehicle_UserRole_Returns403Forbidden() throws Exception {
+        mockMvc.perform(delete("/vehicles/1"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.title").value("Acesso Negado"))
+                .andExpect(jsonPath("$.status").value(403));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @DisplayName("Usuário com Role ADMIN tentando deletar veículo deve ter acesso permitido")
+    void deleteVehicle_AdminRole_Allowed() throws Exception {
+        mockMvc.perform(delete("/vehicles/1"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Tentativa de escalação de privilégio enviando role=ADMIN em /auth/register deve ser ignorada e salvar Role.USER")
+    void register_PrivilegeEscalationAttempt_ForcesRoleUser() throws Exception {
+        String payload = "{\"username\":\"attacker\",\"email\":\"attacker@test.com\",\"password\":\"password123\",\"role\":\"ADMIN\"}";
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username").value("attacker"))
+                .andExpect(jsonPath("$.role").value("USER"));
+
+        User created = userRepository.findByUsername("attacker").orElseThrow();
+        org.junit.jupiter.api.Assertions.assertEquals(Role.USER, created.getRole());
+    }
 }
 

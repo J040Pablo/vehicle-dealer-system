@@ -34,7 +34,7 @@ describe("authApi", () => {
   });
 
   describe("registerApi", () => {
-    it("should send POST request to /auth/register with default role USER", async () => {
+    it("should send POST request to /auth/register without role property", async () => {
       const credentials = { username: "newuser", email: "newuser@example.com", password: "password123", confirmPassword: "password123" };
       const responseData = { id: 1, username: "newuser", email: "newuser@example.com", role: "USER" };
       vi.mocked(http.post).mockResolvedValueOnce({ data: responseData });
@@ -45,7 +45,6 @@ describe("authApi", () => {
         username: "newuser",
         email: "newuser@example.com",
         password: "password123",
-        role: "USER",
       });
       expect(result).toEqual(responseData);
     });
