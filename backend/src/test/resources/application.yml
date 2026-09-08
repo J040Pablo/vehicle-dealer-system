@@ -13,6 +13,22 @@ spring:
     enabled: false
   cache:
     type: simple
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-google-client-id
+            client-secret: test-google-client-secret
+            scope:
+              - email
+              - profile
+              - openid
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
+app:
+  oauth2:
+    authorized-redirect-uri: http://localhost:5173/oauth2/redirect
 
 management:
   health:

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { loginApi, registerApi } from "../api/auth-api";
+import { loginApi, registerApi, exchangeOAuth2CodeApi } from "../api/auth-api";
 import type { LoginCredentials, RegisterCredentials, TokenResponse, UserResponse } from "../types/auth";
 import { useAuth } from "../context/auth-context";
 
@@ -28,6 +28,21 @@ export function useRegister(onRegisterSuccess?: () => void) {
       if (onRegisterSuccess) {
         onRegisterSuccess();
       }
+    },
+  });
+}
+
+export function useExchangeOAuth2Code() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  return useMutation<TokenResponse, Error, string>({
+    mutationFn: (code: string) => exchangeOAuth2CodeApi(code),
+    onSuccess: (data) => {
+      if (data.token) {
+        login(data.token);
+      }
+      navigate("/");
     },
   });
 }

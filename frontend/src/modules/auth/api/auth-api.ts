@@ -14,3 +14,13 @@ export async function registerApi(credentials: RegisterCredentials): Promise<Use
   });
   return response.data;
 }
+
+export async function exchangeOAuth2CodeApi(code: string): Promise<TokenResponse> {
+  const response = await http.post<TokenResponse>("/auth/oauth2/exchange", { code });
+  return response.data;
+}
+
+export async function linkOAuth2AccountApi(code: string): Promise<TokenResponse> {
+  const response = await http.post<TokenResponse>("/auth/oauth2/link", { code });
+  return response.data;
+}

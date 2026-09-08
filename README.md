@@ -161,5 +161,39 @@ A aplicação inicializa o banco com a migração Flyway inserindo um usuário a
 - [x] **CRUD de Veículos**: Cadastro completo com associação de concessionária, tipo de combustível, cor e validação de placa única.
 - [x] **Paginação de Dados**: Suporte a parâmetros `page`, `size` e `sort` no servidor.
 - [x] **Autenticação & Autorização JWT**: Login com geração de JWT (HMAC-SHA256) e controle de acesso baseado em roles (`ADMIN` / `USER`).
+- [x] **Autenticação Híbrida Google OAuth2**: Login social via Google Authorization Code Flow com emissão de JWT próprio, proteção contra account-hijacking (vinculação explícita), e troca de token por One-Time Code temporário (TTL 30s).
 - [x] **Integração ViaCEP**: Consumo de serviço externo com fallback manual.
 - [x] **Auditoria & Rastreabilidade**: Auditoria baseada em eventos via ApplicationEventPublisher e AuditEventListener, persistida na tabela audit_log, com rastreabilidade por X-Correlation-Id.
+
+---
+
+## 🔐 Configuração do Google OAuth2
+
+Para habilitar a autenticação com Google na aplicação:
+
+### 1. Criar Credenciais no Google Cloud Console
+1. Acesse o [Google Cloud Console](https://console.cloud.google.com/).
+2. Crie ou selecione um projeto existente.
+3. Vá em **APIs & Services > Credentials** (APIs e Serviços > Credenciais).
+4. Clique em **Create Credentials > OAuth client ID**.
+5. Selecione **Web Application** (Aplicação Web).
+6. Configure as URIs:
+   * **Authorized JavaScript Origins**: `http://localhost:5173` (ou porta do frontend)
+   * **Authorized Redirect URIs**: `http://localhost:8080/api/login/oauth2/code/google`
+7. Obtenha o **Client ID** e o **Client Secret**.
+
+### 2. Configurar Variáveis de Ambiente
+Adicione ao seu `.env` ou exporte no ambiente:
+
+```env
+GOOGLE_CLIENT_ID=seu_client_id_do_google.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=seu_client_secret
+OAUTH2_REDIRECT_URI=http://localhost:5173/oauth2/redirect
+```
+
+### 3. Arquitetura do Fluxo de Autenticação OAuth2
+1. O usuário clica em **"Entrar com Google"** no frontend e é redirecionado para `http://localhost:8080/oauth2/authorization/google`.
+2. O Spring Security processa a autorização com a API do Google e carrega o perfil verificado do usuário (`CustomOAuth2UserService`).
+3. O `OAuth2AuthenticationSuccessHandler` gera um **One-Time Exchange Code** temporário (salvo em memória ou Redis com TTL de 30s) e redireciona para o frontend: `/oauth2/redirect?code=XYZ`.
+4. O frontend consome o endpoint `/auth/oauth2/exchange` via POST enviando `{ "code": "XYZ" }` e recebe o JWT assinado final da aplicação.
+5. **Política de Segurança de Vinculação (Zero Auto-Linking Cego)**: Se uma conta local (usuário/senha) já existir com o mesmo e-mail, a vinculação automática é bloqueada para evitar *Account Hijacking*. O usuário deve realizar a vinculação autenticada via endpoint `/auth/oauth2/link`.

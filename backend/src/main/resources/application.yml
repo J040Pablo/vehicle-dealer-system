@@ -1,5 +1,6 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
   servlet:
     context-path: /api
 
@@ -31,6 +32,19 @@ spring:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
       port: ${SPRING_DATA_REDIS_PORT:6379}
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:dummy-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:dummy-google-client-secret}
+            scope:
+              - email
+              - profile
+              - openid
+            redirect-uri: "${OAUTH2_GOOGLE_REDIRECT_URI:http://localhost:3000/api/login/oauth2/code/google}"
+
 management:
   endpoints:
     web:
@@ -47,6 +61,8 @@ management:
       cache: true
 
 app:
+  oauth2:
+    authorized-redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/redirect}
   cache:
     ttl:
       dashboard: ${SPRING_DATA_REDIS_TTL_DASHBOARD:5m}
