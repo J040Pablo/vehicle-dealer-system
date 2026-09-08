@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { useTheme } from "next-themes";
 
 import { ConfirmDeleteDialog } from "../confirm-delete-dialog";
@@ -31,8 +30,7 @@ describe("Shared Components", () => {
       expect(screen.getByText("Tem certeza que deseja excluir esta concessionária?")).toBeInTheDocument();
     });
 
-    it("should call onConfirm when confirm button is clicked", async () => {
-      const user = userEvent.setup();
+    it("should call onConfirm when confirm button is clicked", () => {
       const handleConfirm = vi.fn();
 
       render(
@@ -45,7 +43,7 @@ describe("Shared Components", () => {
         />
       );
 
-      await user.click(screen.getByRole("button", { name: "Excluir" }));
+      fireEvent.click(screen.getByRole("button", { name: "Excluir" }));
       expect(handleConfirm).toHaveBeenCalledTimes(1);
     });
 
@@ -85,8 +83,7 @@ describe("Shared Components", () => {
       expect(screen.getByText("5")).toBeInTheDocument();
     });
 
-    it("should disable previous buttons on first page and enable next buttons", async () => {
-      const user = userEvent.setup();
+    it("should disable previous buttons on first page and enable next buttons", () => {
       const handlePageChange = vi.fn();
 
       render(
@@ -105,16 +102,15 @@ describe("Shared Components", () => {
 
       const nextBtn = screen.getByRole("button", { name: "Próxima página" });
       expect(nextBtn).toBeEnabled();
-      await user.click(nextBtn);
+      fireEvent.click(nextBtn);
       expect(handlePageChange).toHaveBeenCalledWith(1);
 
       const lastBtn = screen.getByRole("button", { name: "Última página" });
-      await user.click(lastBtn);
+      fireEvent.click(lastBtn);
       expect(handlePageChange).toHaveBeenCalledWith(2);
     });
 
-    it("should handle previous and first page clicks when on last page", async () => {
-      const user = userEvent.setup();
+    it("should handle previous and first page clicks when on last page", () => {
       const handlePageChange = vi.fn();
 
       render(
@@ -132,11 +128,11 @@ describe("Shared Components", () => {
       expect(screen.getByRole("button", { name: "Última página" })).toBeDisabled();
 
       const prevBtn = screen.getByRole("button", { name: "Página anterior" });
-      await user.click(prevBtn);
+      fireEvent.click(prevBtn);
       expect(handlePageChange).toHaveBeenCalledWith(1);
 
       const firstBtn = screen.getByRole("button", { name: "Primeira página" });
-      await user.click(firstBtn);
+      fireEvent.click(firstBtn);
       expect(handlePageChange).toHaveBeenCalledWith(0);
     });
   });
@@ -178,7 +174,7 @@ describe("Shared Components", () => {
       expect(screen.getByText("Tema do Sistema")).toBeInTheDocument();
     });
 
-    it("should toggle menu and call setTheme when item clicked", async () => {
+    it("should toggle menu and call setTheme when item clicked", () => {
       const mockSetTheme = vi.fn();
       vi.mocked(useTheme).mockReturnValue({
         theme: "light",
@@ -187,15 +183,15 @@ describe("Shared Components", () => {
         systemTheme: "light",
       });
 
-      const user = userEvent.setup();
       render(<ThemeToggle />);
 
-      await user.click(screen.getByRole("button", { name: "Alternar tema de cores" }));
+      const trigger = screen.getByRole("button", { name: "Alternar tema de cores" });
+      fireEvent.keyDown(trigger, { key: "ArrowDown" });
       expect(screen.getByText("Claro")).toBeInTheDocument();
       expect(screen.getByText("Escuro")).toBeInTheDocument();
       expect(screen.getByText("Sistema")).toBeInTheDocument();
 
-      await user.click(screen.getByText("Escuro"));
+      fireEvent.click(screen.getByText("Escuro"));
       expect(mockSetTheme).toHaveBeenCalledWith("dark");
     });
 
@@ -213,8 +209,7 @@ describe("Shared Components", () => {
   });
 
   describe("EmptyState & PageHeader", () => {
-    it("should render EmptyState with title, description, and action button", async () => {
-      const user = userEvent.setup();
+    it("should render EmptyState with title, description, and action button", () => {
       const handleAction = vi.fn();
 
       render(
@@ -230,7 +225,7 @@ describe("Shared Components", () => {
       expect(screen.getByText("Sem veículos")).toBeInTheDocument();
       expect(screen.getByText("Nenhum veículo encontrado")).toBeInTheDocument();
 
-      await user.click(screen.getByRole("button", { name: "Adicionar" }));
+      fireEvent.click(screen.getByRole("button", { name: "Adicionar" }));
       expect(handleAction).toHaveBeenCalledTimes(1);
     });
 

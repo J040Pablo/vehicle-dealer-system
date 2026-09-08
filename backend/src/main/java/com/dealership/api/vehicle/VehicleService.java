@@ -85,7 +85,7 @@ public class VehicleService {
 
         if (dto.dealerId() != null) {
             Dealer dealer = dealerService.getDealerEntity(dto.dealerId());
-            vehicle.setDealer(dealer);
+            vehicle.assignDealer(dealer);
         }
 
         Vehicle saved = vehicleRepository.save(vehicle);
@@ -122,9 +122,9 @@ public class VehicleService {
 
         if (dto.dealerId() != null) {
             Dealer dealer = dealerService.getDealerEntity(dto.dealerId());
-            vehicle.setDealer(dealer);
+            vehicle.assignDealer(dealer);
         } else {
-            vehicle.setDealer(null);
+            vehicle.removeDealer();
         }
 
         Vehicle updated = vehicleRepository.save(vehicle);
@@ -162,7 +162,7 @@ public class VehicleService {
         Long previousDealerId = vehicle.getDealer() != null ? vehicle.getDealer().getId() : null;
         Dealer dealer = dealerService.getDealerEntity(dealerId);
 
-        vehicle.setDealer(dealer);
+        vehicle.assignDealer(dealer);
         Vehicle updated = vehicleRepository.save(vehicle);
 
         if (previousDealerId != null && !previousDealerId.equals(dealerId)) {

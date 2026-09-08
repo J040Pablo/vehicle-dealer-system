@@ -55,13 +55,7 @@ window.ResizeObserver = ResizeObserver;
 // Polyfill scrollIntoView for jsdom
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
-// Polyfill PointerEvent / HasPointerCapture for Radix Select/Dialog
-if (!window.Element.prototype.hasPointerCapture) {
-  window.Element.prototype.hasPointerCapture = vi.fn().mockReturnValue(false);
-}
-if (!window.Element.prototype.setPointerCapture) {
-  window.Element.prototype.setPointerCapture = vi.fn();
-}
-if (!window.Element.prototype.releasePointerCapture) {
-  window.Element.prototype.releasePointerCapture = vi.fn();
-}
+// Polyfill PointerEvent / HasPointerCapture for Radix UI components in jsdom
+window.Element.prototype.hasPointerCapture = vi.fn().mockReturnValue(false);
+window.Element.prototype.setPointerCapture = vi.fn();
+window.Element.prototype.releasePointerCapture = vi.fn();

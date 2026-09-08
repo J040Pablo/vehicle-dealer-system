@@ -51,4 +51,16 @@ public class Vehicle {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    public void assignDealer(Dealer dealer) {
+        this.dealer = dealer;
+    }
+
+    public void removeDealer() {
+        this.dealer = null;
+    }
+
+    public boolean isAssociatedWith(Long dealerId) {
+        return this.dealer != null && this.dealer.getId() != null && this.dealer.getId().equals(dealerId);
+    }
 }
