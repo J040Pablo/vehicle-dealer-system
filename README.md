@@ -1,103 +1,165 @@
-# Vehicle Dealer System – Gestão de Veículos e Concessionárias
+# Vehicle Dealer System
 
-> **Desafio Técnico – Desenvolvedor Fullstack (Java 21 / Spring Boot + React / TypeScript)**
+[![Backend CI](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/backend-ci.yml)
 
----
+[![Frontend CI](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/frontend-ci.yml)
 
-## Sobre o Projeto
-
-O **Vehicle Dealer System** é uma aplicação web completa projetada para gerenciar concessionárias parceiras e o catálogo de veículos disponíveis de uma montadora. 
-
-A solução oferece:
-- **Cadastro e Manutenção de Concessionárias**: Auto-preenchimento de endereço no backend via integração com a **API ViaCEP**.
-- **Cadastro e Gestão de Veículos**: Cadastro de marca, modelo, ano, placa e tipo de combustível (`FLEX`, `GASOLINA`, `ETANOL`, `DIESEL`, `ELETRICO`, `HIBRIDO`).
-- **Associação Dinâmica (1:N)**: Vincule ou transfira veículos entre concessionárias com facilidade.
-- **Rastreabilidade & Auditoria**: Logs estruturados em formato JSON com `X-Correlation-Id` e tabela de auditoria `audit_log` via Spring Events.
-- **Health Check**: Monitoring de status da aplicação em `/api/actuator/health`.
+Sistema corporativo para gestão de concessionárias e catálogo de veículos, desenvolvido como solução para Desafio Técnico Full Stack.
 
 ---
 
-## Tecnologias Utilizadas
+## 📌 Visão Geral do Projeto
+
+O **Vehicle Dealer System** é uma aplicação Full Stack projetada para centralizar o gerenciamento de concessionárias e o catálogo de veículos associados. O sistema oferece uma interface web intuitiva desenvolvida em **React 18** e **TypeScript**, suportada por uma API RESTful robusta desenvolvida em **Java 21** e **Spring Boot 3**.
+
+---
+
+## 🚀 Diferenciais Implementados
+
+* 🌐 **Integração Automática ViaCEP**: Busca e auto-preenchimento automatizado de logradouro, bairro, cidade e UF a partir do CEP informado, com mecanismo resiliente de fallback manual.
+* 📊 **Observabilidade Corporativa & Structured JSON Logging**: Emissão de logs JSON padronizados (com `timestamp`, `level`, `application`, `environment`, `logger`, `correlationId`, `message`, `exception`) compatíveis com **ELK**, **OpenSearch**, **Datadog** e **Loki**, além de rastreabilidade HTTP e eventos de negócio.
+* 🐳 **Conteinerização Total (Docker & Docker Compose)**: Orquestração completa de banco de dados PostgreSQL, API Backend e Frontend web com healthchecks automatizados.
+* 📚 **Documentação OpenAPI 3.0 (Swagger UI)**: Interface interativa para exploração e testes de todos os endpoints REST.
+* 🔐 **Segurança & Autenticação JWT**: Autenticação stateless via JSON Web Token assinado com HMAC-SHA256 e suporte a perfis de acesso (`ADMIN` e `USER`).
+* 🧪 **Suíte de Testes Unitários e de Integração**: Cobertura de testes automatizados no backend cobrindo serviços, segurança, controladores e utilitários.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
 
 ### Backend
-- **Java 21** & **Spring Boot 3.3**
-- **Spring Data JPA** & **Hibernate**
-- **PostgreSQL 16** & **Flyway Migration**
-- **MapStruct** & **Lombok**
-- **Bean Validation (Jakarta)**
-- **OpenAPI 3.0 / Swagger UI**
-- **JUnit 5**, **Mockito** & **Testcontainers**
+* **Linguagem & Framework**: Java 21, Spring Boot 3.3.3
+* **Observabilidade & Logging**: Logback, `logstash-logback-encoder`, Spring Boot Actuator, MDC Correlation ID
+* **Segurança**: Spring Security 6, JWT (jjwt 0.12.6), BCrypt
+* **Persistência & Migrações**: Spring Data JPA, Hibernate, PostgreSQL 16, Flyway Migrations
+* **Ferramentas**: Maven, Lombok, MapStruct, OpenAPI/Swagger UI
 
 ### Frontend
-- **React 18** + **TypeScript** + **Vite**
-- **TanStack Query (React Query v5)**
-- **React Hook Form** + **Zod Schema Validation**
-- **Tailwind CSS** + **Lucide Icons**
-- **Axios Interceptor** (Injeção de `X-Correlation-Id`)
-
-### Infraestrutura
-- **Docker** & **Docker Compose**
-- **Nginx Alpine**
+* **Core**: React 18, TypeScript, Vite
+* **Roteamento & Estado**: React Router DOM, TanStack Query (React Query)
+* **Formulários & Validação**: React Hook Form, Zod
+* **Estilização**: Tailwind CSS, Lucide React
 
 ---
 
-## Como Executar o Projeto
+## 📁 Estrutura do Projeto
 
-### Opção 1: Via Docker Compose (Recomendado - 1 Comando)
-
-Pré-requisito: Ter o **Docker** e o **Docker Compose** instalados na sua máquina.
-
-```bash
-# Clone o repositório e acesse a pasta raiz
-cd vehicle-dealer-system
-
-# Suba todos os containers (PostgreSQL, Backend e Frontend)
-docker-compose up -d --build
-```
-
-Após subir os containers, acesse:
-- 💻 **Frontend (Web UI)**: [http://localhost:3000](http://localhost:3000)
-- ⚙️ **Backend REST API**: [http://localhost:8080/api](http://localhost:8080/api)
-- 📑 **Documentação Swagger UI**: [http://localhost:8080/api/swagger-ui.html](http://localhost:8080/api/swagger-ui.html)
-- 🏥 **Actuator Health Check**: [http://localhost:8080/api/actuator/health](http://localhost:8080/api/actuator/health)
-
----
-
-### Opção 2: Executar Localmente (Desenvolvimento)
-
-#### 1. Banco de Dados PostgreSQL
-Suba apenas o container do banco:
-```bash
-docker-compose up -d postgres
-```
-
-#### 2. Backend Spring Boot
-```bash
-cd backend
-./mvnw spring-boot:run
-```
-
-#### 3. Frontend React Vite
-```bash
-cd frontend
-npm install
-npm run dev
+```text
+vehicle-dealer-system/
+├── backend/                  # API RESTful Spring Boot
+│   ├── src/main/java/        # Código-fonte Java (Controllers, Services, Repositories)
+│   ├── src/main/resources/   # Configurações (application.yml) e migrações Flyway
+│   └── src/test/java/        # Testes unitários e de integração
+├── frontend/                 # Aplicação React SPA
+│   ├── src/modules/          # Módulos (dealers, vehicles, auth, dashboard)
+│   └── src/shared/           # Componentes UI, hooks, cliente HTTP e utilitários
+├── docs/                     # Documentação do projeto
+│   └── architecture/         # Documentos de Arquitetura e Modelo de Dados
+│       ├── architecture.md   # Visão Geral da Arquitetura, Componentes e Fluxos
+│       └── data-model.md     # Modelo ERD, Tabelas, Índices e Migrações Flyway
+├── docker-compose.yml        # Orquestração de contêineres (PostgreSQL, Backend, Frontend)
+└── README.md                 # Documento principal do repositório
 ```
 
 ---
 
-## 🧪 Executando os Testes Unitários
+## 🌐 Documentação de Arquitetura
 
-Para rodar a suíte de testes do Backend:
-
-```bash
-cd backend
-./mvnw test
-```
+A documentação detalhada da solução está disponível em:
+* 📐 [**Arquitetura da Solução**](docs/architecture/architecture.md): Visão de componentes, arquitetura frontend/backend, fluxo de autenticação JWT, integração ViaCEP e decisões de design.
+* 🛢️ [**Modelo de Dados & ERD**](docs/architecture/data-model.md): Diagrama Entidade-Relacionamento, restrições relacionais, índices de alta performance e migrações Flyway.
 
 ---
 
-## 📖 Documentação Arquitetural & AWS
+## 🔗 Documentações Específicas
 
-- 📑 Arquitetura Completa do Sistema: [`ARCHITECTURE.md`](ARCHITECTURE.md)
-- ☁️ Guia de Implantação Futura na AWS: [`docs/aws-deployment.md`](docs/aws-deployment.md)
+Para obter detalhes aprofundados sobre a implementação técnica de cada camada da aplicação, consulte:
+
+- 📘 [**Backend README**](backend/README.md) – Arquitetura Java 21, Spring Boot, Spring Security, Flyway, DTOs, Mappers, auditoria, integração ViaCEP e suíte de testes.
+
+- 📙 [**Frontend README**](frontend/README.md) – React 18, TypeScript, TanStack Query, React Hook Form, Zod, arquitetura modular, gerenciamento de estado e componentes reutilizáveis.
+
+---
+
+## ⚡ Como Executar
+
+### Pré-requisitos
+* **Docker Engine** (v20.10+) e **Docker Compose** (v2.0+)
+* *(Opcional para execução nativa)*: **Java 21 JDK** e **Node.js 18+**
+
+---
+
+### 1. Execução via Docker Compose (Recomendado)
+
+1. **Configurar as Variáveis de Ambiente**:
+   Na raiz do projeto, crie o arquivo `.env` a partir do modelo `.env.example`:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Iniciar os Contêineres**:
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. **Verificar os Logs**:
+   ```bash
+   docker compose logs -f backend
+   ```
+
+---
+
+### 2. Execução Manual para Desenvolvimento
+
+1. **Subir o banco PostgreSQL**:
+   ```bash
+   docker compose up -d postgres
+   ```
+
+2. **Iniciar o Backend (Spring Boot)**:
+   ```bash
+   cd backend
+   cp ../.env.example .env  # ou defina JWT_SECRET no ambiente
+   mvn spring-boot:run
+   ```
+
+3. **Iniciar o Frontend (React)**:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+---
+
+## 🔗 URLs de Acesso & Swagger
+
+Após iniciar a aplicação, utilize as URLs abaixo:
+
+| Serviço | URL | Descrição |
+|----------|-----|------------|
+| **Frontend Web** | http://localhost:3000 | Interface gráfica principal da aplicação |
+| **Backend REST API** | http://localhost:8080/api | Base URL da API RESTful |
+| **Swagger UI** | http://localhost:8080/api/swagger-ui.html | Documentação interativa dos endpoints |
+| **Health Check** | http://localhost:8080/api/actuator/health | Endpoint de observabilidade do Spring Actuator |
+
+---
+
+## 🔑 Credenciais de Desenvolvimento
+
+A aplicação inicializa o banco com a migração Flyway inserindo um usuário administrador padrão:
+
+* **Usuário**: `admin`
+* **Senha**: `admin123`
+* **Perfil**: `ADMIN`
+
+---
+
+## ✨ Funcionalidades Implementadas
+
+- [x] **CRUD de Concessionárias**: Cadastro com auto-preenchimento via CEP, edição, listagem paginada e exclusão.
+- [x] **CRUD de Veículos**: Cadastro completo com associação de concessionária, tipo de combustível, cor e validação de placa única.
+- [x] **Paginação de Dados**: Suporte a parâmetros `page`, `size` e `sort` no servidor.
+- [x] **Autenticação & Autorização JWT**: Login com geração de JWT (HMAC-SHA256) e controle de acesso baseado em roles (`ADMIN` / `USER`).
+- [x] **Integração ViaCEP**: Consumo de serviço externo com fallback manual.
+- [x] **Auditoria & Rastreabilidade**: Auditoria baseada em eventos via ApplicationEventPublisher e AuditEventListener, persistida na tabela audit_log, com rastreabilidade por X-Correlation-Id.

@@ -33,6 +33,9 @@ public class Vehicle {
     @Column(name = "plate", nullable = false, unique = true, length = 10)
     private String plate;
 
+    @Column(name = "color", nullable = false, length = 50)
+    private String color;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "fuel_type", nullable = false, length = 20)
     private FuelType fuelType;

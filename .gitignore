@@ -21,6 +21,7 @@ backend/.mvn/
 # Node / Vite (Frontend)
 frontend/node_modules/
 frontend/dist/
+frontend/coverage/
 frontend/.vite/
 frontend/build/
 npm-debug.log*

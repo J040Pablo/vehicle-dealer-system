@@ -3,17 +3,26 @@ package com.dealership.api.dealer;
 import com.dealership.api.dealer.dto.DealerRequestDTO;
 import com.dealership.api.dealer.dto.DealerResponseDTO;
 import com.dealership.api.shared.audit.AuditEvent;
-import com.dealership.api.shared.exception.CnpjAlreadyExistsException;
+
 import com.dealership.api.shared.exception.ResourceNotFoundException;
+import com.dealership.api.shared.util.CepUtils;
+import com.dealership.api.shared.util.CnpjUtils;
 import com.dealership.api.viacep.ViaCepService;
 import com.dealership.api.viacep.dto.ViaCepResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import com.dealership.api.shared.dto.PagedResponseDTO;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 
 @Slf4j
 @Service
@@ -23,9 +32,19 @@ public class DealerService {
     private final DealerRepository dealerRepository;
     private final DealerMapper dealerMapper;
     private final ViaCepService viaCepService;
+    private final DealerPersistenceService dealerPersistenceService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "dealers", key = "'dealers:page:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()", sync = true)
+    public PagedResponseDTO<DealerResponseDTO> findAll(Pageable pageable) {
+        Page<DealerResponseDTO> pageResult = dealerRepository.findAll(pageable)
+                .map(dealerMapper::toDTO);
+        return PagedResponseDTO.from(pageResult);
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = "dealers", key = "'dealers:all'", sync = true)
     public List<DealerResponseDTO> findAll() {
         return dealerRepository.findAll().stream()
                 .map(dealerMapper::toDTO)
@@ -33,96 +52,77 @@ public class DealerService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "dealers", key = "'dealer:' + #id", sync = true)
     public DealerResponseDTO findById(Long id) {
         Dealer dealer = getDealerEntity(id);
         return dealerMapper.toDTO(dealer);
     }
 
-    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "dealers", allEntries = true),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public DealerResponseDTO create(DealerRequestDTO dto) {
-        log.info("Iniciando cadastro de concessionária: CNPJ={}", dto.cnpj());
+        String cleanCnpj = CnpjUtils.normalize(dto.cnpj());
+        String cleanCep = CepUtils.normalize(dto.cep());
 
-        if (dealerRepository.existsByCnpj(dto.cnpj())) {
-            throw new CnpjAlreadyExistsException(dto.cnpj());
-        }
+        log.info("Iniciando busca externa ViaCEP para cadastro de concessionária: CNPJ={}", cleanCnpj);
 
-        Dealer dealer = dealerMapper.toEntity(dto);
+        // 1. Busca externa ViaCEP com fallback manual executada FORA da transação
+        ViaCepResponseDTO addressDTO = viaCepService.fetchAddressOrFallback(
+                cleanCep, dto.street(), dto.neighborhood(), dto.city(), dto.state());
 
-        // Preenchimento de endereço via ViaCEP no backend
-        ViaCepResponseDTO addressDTO = viaCepService.fetchAddress(dto.cep());
-        dealer.setStreet(addressDTO.street());
-        dealer.setNeighborhood(addressDTO.neighborhood());
-        dealer.setCity(addressDTO.city());
-        dealer.setState(addressDTO.state());
-
-        Dealer saved = dealerRepository.save(dealer);
-        log.info("Concessionária criada com sucesso: ID={}", saved.getId());
-
-        // Disparo de Evento de Auditoria
-        eventPublisher.publishEvent(new AuditEvent(
-                "DEALER",
-                saved.getId(),
-                "CREATE",
-                "Created Dealer: " + saved.getName() + " (CNPJ: " + saved.getCnpj() + ")"
-        ));
-
-        return dealerMapper.toDTO(saved);
+        // 2. Transação iniciada estritamente para validação de banco e persistência
+        return dealerPersistenceService.saveNewDealer(dto, cleanCnpj, cleanCep, addressDTO);
     }
 
-    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "dealers", allEntries = true),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public DealerResponseDTO update(Long id, DealerRequestDTO dto) {
-        log.info("Atualizando concessionária: ID={}", id);
+        String cleanCnpj = CnpjUtils.normalize(dto.cnpj());
+        String cleanCep = CepUtils.normalize(dto.cep());
+
+        log.info("Atualizando concessionária com busca externa ViaCEP: ID={}", id);
 
         Dealer dealer = getDealerEntity(id);
 
-        if (dealerRepository.existsByCnpjAndIdNot(dto.cnpj(), id)) {
-            throw new CnpjAlreadyExistsException(dto.cnpj());
-        }
+        // 1. Busca externa ViaCEP com fallback manual executada FORA da transação
+        ViaCepResponseDTO addressDTO = viaCepService.fetchAddressOrFallback(
+                cleanCep, dto.street(), dto.neighborhood(), dto.city(), dto.state());
 
-        dealerMapper.updateEntityFromDTO(dto, dealer);
-
-        // Atualização de endereço caso o CEP tenha mudado ou precise revalidar
-        ViaCepResponseDTO addressDTO = viaCepService.fetchAddress(dto.cep());
-        dealer.setStreet(addressDTO.street());
-        dealer.setNeighborhood(addressDTO.neighborhood());
-        dealer.setCity(addressDTO.city());
-        dealer.setState(addressDTO.state());
-
-        Dealer updated = dealerRepository.save(dealer);
-        log.info("Concessionária atualizada com sucesso: ID={}", updated.getId());
-
-        // Disparo de Evento de Auditoria
-        eventPublisher.publishEvent(new AuditEvent(
-                "DEALER",
-                updated.getId(),
-                "UPDATE",
-                "Updated Dealer: " + updated.getName() + " (CNPJ: " + updated.getCnpj() + ")"
-        ));
-
-        return dealerMapper.toDTO(updated);
+        // 2. Transação iniciada estritamente para validação de banco e persistência
+        return dealerPersistenceService.saveUpdatedDealer(dealer, dto, cleanCnpj, cleanCep, addressDTO);
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "dealers", allEntries = true),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public void delete(Long id) {
         log.info("Excluindo concessionária: ID={}", id);
 
         Dealer dealer = getDealerEntity(id);
-        
+
         // Desvincular veículos associados
         if (dealer.getVehicles() != null) {
             dealer.getVehicles().forEach(v -> v.setDealer(null));
         }
 
         dealerRepository.delete(dealer);
-        log.info("Concessionária excluída com sucesso: ID={}", id);
+        log.info("Evento de negócio: operation=DEALER_DELETED entityId={}", id);
 
         // Disparo de Evento de Auditoria
         eventPublisher.publishEvent(new AuditEvent(
                 "DEALER",
                 id,
                 "DELETE",
-                "Deleted Dealer ID: " + id
-        ));
+                "Deleted Dealer ID: " + id));
     }
 
     public Dealer getDealerEntity(Long id) {

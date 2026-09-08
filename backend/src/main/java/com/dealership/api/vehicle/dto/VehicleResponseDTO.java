@@ -10,6 +10,7 @@ public record VehicleResponseDTO(
         String model,
         Integer year,
         String plate,
+        String color,
         FuelType fuelType,
         Long dealerId,
         String dealerName,
