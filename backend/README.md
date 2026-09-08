@@ -144,7 +144,13 @@ As configurações principais da aplicação estão mapeadas no arquivo `src/mai
 
 ---
 
-## 🔐 Autenticação, Demonstração & Regras do `JWT_SECRET`
+## 🔐 Autenticação & Security Features
+
+### Security Features
+
+- **JWT Authentication**: Autenticação stateless baseada em JSON Web Tokens (HMAC-SHA256).
+- **Password Encryption**: Criptografia de senhas com algoritmo BCrypt via Spring Security.
+- **Rate Limiting (5 req/min por IP)**: Proteção contra brute force no endpoint de autenticação (`/auth/login`) utilizando Bucket4j in-memory.
 
 ### Usuário Administrador de Demonstração (Seed Database)
 Na inicialização do sistema, a migração Flyway `db/migration/V2__security_schema.sql` semeia automaticamente um usuário administrador para desenvolvimento local:
