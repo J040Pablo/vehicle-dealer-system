@@ -34,7 +34,7 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 20)
     private Role role;
 
-    @Column(length = 100)
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
 
     @Builder.Default

@@ -35,13 +35,13 @@ public class AuthController {
     @PostMapping("/oauth2/link")
     @Operation(summary = "Vincular explicitamente uma conta Google ao usuário autenticado")
     public ResponseEntity<UserResponseDTO> linkAccount(
-            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails,
+            org.springframework.security.core.Authentication authentication,
             @Valid @RequestBody com.dealership.api.user.dto.OAuth2LinkRequestDTO dto
     ) {
-        if (userDetails == null) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        UserResponseDTO linked = authService.linkOAuth2Account(userDetails.getUsername(), dto);
+        UserResponseDTO linked = authService.linkOAuth2Account(authentication.getName(), dto);
         return ResponseEntity.ok(linked);
     }
 

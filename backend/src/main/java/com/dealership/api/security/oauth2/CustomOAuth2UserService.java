@@ -58,6 +58,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String email = oAuth2User.getAttribute("email");
         Boolean emailVerified = oAuth2User.getAttribute("email_verified");
 
+        if (email == null || email.trim().isEmpty()) {
+            throw new OAuth2AuthenticationException(
+                    new OAuth2Error("invalid_email"),
+                    "E-mail ausente na resposta de autenticação do Google."
+            );
+        }
+
         if (emailVerified != null && !emailVerified) {
             log.warn("Tentativa de login OAuth2 com e-mail não verificado: {}", email);
             throw new OAuth2AuthenticationException(

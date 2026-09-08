@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  username: z.string().min(1, "O usuário é obrigatório"),
+  username: z.string().min(1, "O usuário ou e-mail é obrigatório"),
   password: z.string().min(1, "A senha é obrigatória"),
 });
 
@@ -10,6 +10,10 @@ export type LoginCredentials = z.infer<typeof loginSchema>;
 export const registerSchema = z
   .object({
     username: z.string().min(3, "O usuário deve ter no mínimo 3 caracteres"),
+    email: z
+      .string()
+      .min(1, "E-mail é obrigatório")
+      .email("E-mail em formato inválido"),
     password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
     confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
   })
@@ -27,5 +31,11 @@ export interface TokenResponse {
 export interface UserResponse {
   id: number;
   username: string;
+  email: string;
   role: string;
+}
+
+export interface OAuth2LinkRequest {
+  providerId: string;
+  email?: string;
 }

@@ -35,14 +35,15 @@ describe("authApi", () => {
 
   describe("registerApi", () => {
     it("should send POST request to /auth/register with default role USER", async () => {
-      const credentials = { username: "newuser", password: "password123", confirmPassword: "password123" };
-      const responseData = { id: 1, username: "newuser", role: "USER" };
+      const credentials = { username: "newuser", email: "newuser@example.com", password: "password123", confirmPassword: "password123" };
+      const responseData = { id: 1, username: "newuser", email: "newuser@example.com", role: "USER" };
       vi.mocked(http.post).mockResolvedValueOnce({ data: responseData });
 
       const result = await registerApi(credentials);
 
       expect(http.post).toHaveBeenCalledWith("/auth/register", {
         username: "newuser",
+        email: "newuser@example.com",
         password: "password123",
         role: "USER",
       });
@@ -50,7 +51,7 @@ describe("authApi", () => {
     });
 
     it("should propagate errors when registerApi fails", async () => {
-      const credentials = { username: "existing", password: "password123", confirmPassword: "password123" };
+      const credentials = { username: "existing", email: "existing@example.com", password: "password123", confirmPassword: "password123" };
       vi.mocked(http.post).mockRejectedValueOnce(new Error("Username already taken"));
 
       await expect(registerApi(credentials)).rejects.toThrow("Username already taken");

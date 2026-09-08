@@ -20,6 +20,7 @@ class OAuth2CodeExchangeServiceTest {
         testUser = User.builder()
                 .id(1L)
                 .username("testuser")
+                .email("testuser@example.com")
                 .role(Role.USER)
                 .provider(AuthProvider.GOOGLE)
                 .build();

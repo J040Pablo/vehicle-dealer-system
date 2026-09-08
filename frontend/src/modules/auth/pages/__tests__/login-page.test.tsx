@@ -69,7 +69,7 @@ describe("LoginPage", () => {
     renderComponent();
 
     expect(screen.getByText("Informe suas credenciais para acessar a plataforma")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Digite seu usuário...")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Digite seu usuário ou e-mail...")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Digite sua senha...")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Entrar no sistema" })).toBeInTheDocument();
   });
@@ -90,7 +90,7 @@ describe("LoginPage", () => {
   it("should submit login credentials when submitting valid login form", async () => {
     const { user } = renderComponent();
 
-    await user.type(screen.getByPlaceholderText("Digite seu usuário..."), "admin");
+    await user.type(screen.getByPlaceholderText("Digite seu usuário ou e-mail..."), "admin");
     await user.type(screen.getByPlaceholderText("Digite sua senha..."), "password123");
 
     const submitBtn = screen.getByRole("button", { name: "Entrar no sistema" });
@@ -111,6 +111,7 @@ describe("LoginPage", () => {
     await user.click(registerTab);
 
     await user.type(screen.getByPlaceholderText("Escolha um nome de usuário..."), "newuser");
+    await user.type(screen.getByPlaceholderText("seu.email@exemplo.com"), "newuser@example.com");
     await user.type(screen.getByPlaceholderText("Escolha uma senha (mín. 6 caracteres)..."), "secret123");
     await user.type(screen.getByPlaceholderText("Repita a senha escolhida..."), "secret123");
 
@@ -120,6 +121,7 @@ describe("LoginPage", () => {
     await waitFor(() => {
       expect(mockMutateRegister).toHaveBeenCalledWith({
         username: "newuser",
+        email: "newuser@example.com",
         password: "secret123",
         confirmPassword: "secret123",
       });
@@ -141,8 +143,17 @@ describe("LoginPage", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Cadastro Realizado!")).toBeInTheDocument();
-      expect(screen.getByPlaceholderText("Digite seu usuário...")).toHaveValue("registered_user");
+      expect(screen.getByPlaceholderText("Digite seu usuário ou e-mail...")).toHaveValue("registered_user");
     });
+  });
+
+  it("should render Continuar com Google button when switching to registration tab", async () => {
+    const { user } = renderComponent();
+
+    const registerTab = screen.getByRole("button", { name: "Cadastrar" });
+    await user.click(registerTab);
+
+    expect(screen.getByRole("button", { name: "Continuar com Google" })).toBeInTheDocument();
   });
 
   it("should render error alert when login mutation fails", () => {

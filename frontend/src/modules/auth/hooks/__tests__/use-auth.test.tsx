@@ -68,18 +68,19 @@ describe("Auth Hooks", () => {
   describe("useRegister", () => {
     it("should call registerApi and execute onRegisterSuccess callback", async () => {
       const onRegisterSuccess = vi.fn();
-      vi.mocked(authApi.registerApi).mockResolvedValueOnce({ id: 1, username: "newuser", role: "USER" });
+      vi.mocked(authApi.registerApi).mockResolvedValueOnce({ id: 1, username: "newuser", email: "newuser@example.com", role: "USER" });
 
       const { result } = renderHook(() => useRegister(onRegisterSuccess), { wrapper: createWrapper() });
 
       act(() => {
-        result.current.mutate({ username: "newuser", password: "password", confirmPassword: "password" });
+        result.current.mutate({ username: "newuser", email: "newuser@example.com", password: "password", confirmPassword: "password" });
       });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(authApi.registerApi).toHaveBeenCalledWith(
         expect.objectContaining({
           username: "newuser",
+          email: "newuser@example.com",
           password: "password",
           confirmPassword: "password",
         }),
