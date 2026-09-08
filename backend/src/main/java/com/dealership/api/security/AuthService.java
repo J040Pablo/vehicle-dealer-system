@@ -116,13 +116,11 @@ public class AuthService {
             throw new BusinessException("E-mail '" + email + "' já está em uso.");
         }
 
-        Role userRole = dto.role() != null ? dto.role() : Role.USER;
-
         User user = User.builder()
                 .username(dto.username())
                 .email(email)
                 .password(passwordEncoder.encode(dto.password()))
-                .role(userRole)
+                .role(Role.USER)
                 .build();
 
         User saved = userRepository.save(user);

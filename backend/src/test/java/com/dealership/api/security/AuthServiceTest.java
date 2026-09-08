@@ -116,9 +116,9 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("Deve registrar novo usuário com e-mail com sucesso")
+    @DisplayName("Deve registrar novo usuário com e-mail com sucesso e atrelar incondicionalmente Role.USER")
     void register_Success() {
-        RegisterRequestDTO request = new RegisterRequestDTO("newuser", "newuser@example.com", "password123", Role.USER);
+        RegisterRequestDTO request = new RegisterRequestDTO("newuser", "newuser@example.com", "password123");
 
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
         when(userRepository.existsByEmail("newuser@example.com")).thenReturn(false);
@@ -129,13 +129,16 @@ class AuthServiceTest {
 
         assertThat(response).isNotNull();
         assertThat(response.username()).isEqualTo("testuser");
-        verify(userRepository, times(1)).save(any(User.class));
+        
+        org.mockito.ArgumentCaptor<User> userCaptor = org.mockito.ArgumentCaptor.forClass(User.class);
+        verify(userRepository, times(1)).save(userCaptor.capture());
+        assertThat(userCaptor.getValue().getRole()).isEqualTo(Role.USER);
     }
 
     @Test
     @DisplayName("Deve lançar BusinessException ao registrar username já existente")
     void register_DuplicateUsername_ThrowsException() {
-        RegisterRequestDTO request = new RegisterRequestDTO("testuser", "testuser@example.com", "password123", Role.USER);
+        RegisterRequestDTO request = new RegisterRequestDTO("testuser", "testuser@example.com", "password123");
 
         when(userRepository.existsByUsername("testuser")).thenReturn(true);
 
@@ -149,7 +152,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("Deve lançar BusinessException ao registrar e-mail já existente")
     void register_DuplicateEmail_ThrowsException() {
-        RegisterRequestDTO request = new RegisterRequestDTO("newuser", "testuser@example.com", "password123", Role.USER);
+        RegisterRequestDTO request = new RegisterRequestDTO("newuser", "testuser@example.com", "password123");
 
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
         when(userRepository.existsByEmail("testuser@example.com")).thenReturn(true);
