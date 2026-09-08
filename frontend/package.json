@@ -46,7 +46,7 @@
     "@types/react": "^18.3.4",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/coverage-v8": "^3.2.6",
     "autoprefixer": "^10.4.20",
     "jsdom": "^30.0.1",
     "postcss": "^8.4.41",
@@ -54,6 +54,6 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.5.3",
     "vite": "^5.4.2",
-    "vitest": "^2.1.9"
+    "vitest": "^3.2.6"
   }
 }
