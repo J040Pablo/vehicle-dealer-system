@@ -44,6 +44,9 @@ class AuthControllerTest {
     @MockBean
     private CustomUserDetailsService userDetailsService;
 
+    @MockBean
+    private com.dealership.api.security.ratelimit.RateLimitService rateLimitService;
+
     @Test
     @DisplayName("POST /auth/login deve autenticar e retornar 200 OK com token")
     void login_ReturnsToken() throws Exception {

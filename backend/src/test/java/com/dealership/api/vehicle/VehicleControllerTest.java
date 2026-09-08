@@ -54,6 +54,9 @@ class VehicleControllerTest {
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @MockBean
+    private com.dealership.api.security.ratelimit.RateLimitService rateLimitService;
+
     private VehicleRequestDTO requestDTO;
     private VehicleResponseDTO responseDTO;
 

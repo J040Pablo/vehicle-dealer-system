@@ -24,6 +24,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.dealership.api.security.ratelimit.RateLimitService;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -38,6 +40,9 @@ class SecurityIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RateLimitService rateLimitService;
+
     @MockBean
     private VehicleService vehicleService;
 
@@ -46,6 +51,8 @@ class SecurityIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        rateLimitService.reset();
+
         if (!userRepository.existsByUsername("admin")) {
             User admin = User.builder()
                     .username("admin")
