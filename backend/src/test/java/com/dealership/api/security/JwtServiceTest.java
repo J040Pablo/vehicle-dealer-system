@@ -25,6 +25,7 @@ class JwtServiceTest {
         testUser = User.builder()
                 .id(1L)
                 .username("admin")
+                .email("admin@dealership.com")
                 .password("encoded_password")
                 .role(Role.ADMIN)
                 .build();
@@ -82,7 +83,7 @@ class JwtServiceTest {
     void isTokenValid_WrongUser_ReturnsFalse() {
         String token = jwtService.generateToken(testUser);
 
-        User otherUser = User.builder().username("other_user").role(Role.USER).build();
+        User otherUser = User.builder().username("other_user").email("other@dealership.com").role(Role.USER).build();
 
         boolean isValid = jwtService.isTokenValid(token, otherUser);
 

@@ -5,12 +5,17 @@ import { DashboardPage } from "@/modules/dashboard/pages/dashboard-page";
 import { VehiclesPage } from "@/modules/vehicles/pages/vehicles-page";
 import { DealersPage } from "@/modules/dealers/pages/dealers-page";
 import { LoginPage } from "@/modules/auth/pages/login-page";
+import { OAuth2RedirectPage } from "@/modules/auth/pages/oauth2-redirect-page";
 import { ProtectedRoute } from "@/shared/components/protected-route";
 
 export const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
+  },
+  {
+    path: "/oauth2/redirect",
+    element: <OAuth2RedirectPage />,
   },
   {
     element: <ProtectedRoute />,

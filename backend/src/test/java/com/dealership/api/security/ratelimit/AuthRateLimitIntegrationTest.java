@@ -53,6 +53,7 @@ class AuthRateLimitIntegrationTest {
         if (!userRepository.existsByUsername("admin")) {
             User admin = User.builder()
                     .username("admin")
+                    .email("admin@dealership.com")
                     .password(passwordEncoder.encode("admin123"))
                     .role(Role.ADMIN)
                     .build();

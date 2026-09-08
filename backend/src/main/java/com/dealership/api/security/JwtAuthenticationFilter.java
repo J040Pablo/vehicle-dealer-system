@@ -28,8 +28,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
         String path = request.getServletPath();
         String requestUri = request.getRequestURI();
+
+        if (path.endsWith("/auth/oauth2/link") || requestUri.endsWith("/auth/oauth2/link")) {
+            return false;
+        }
+
         return path.startsWith("/auth/") || path.startsWith("/api/auth/")
-                || requestUri.startsWith("/api/auth/") || requestUri.startsWith("/auth/");
+                || requestUri.startsWith("/api/auth/") || requestUri.startsWith("/auth/")
+                || path.startsWith("/oauth2/") || path.startsWith("/login/oauth2/")
+                || requestUri.startsWith("/oauth2/") || requestUri.startsWith("/login/oauth2/");
     }
 
     @Override

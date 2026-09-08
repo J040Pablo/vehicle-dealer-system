@@ -3,6 +3,7 @@ package com.dealership.api.dealer;
 import com.dealership.api.dealer.dto.DealerRequestDTO;
 import com.dealership.api.dealer.dto.DealerResponseDTO;
 import com.dealership.api.shared.audit.AuditEvent;
+import com.dealership.api.vehicle.Vehicle;
 
 import com.dealership.api.shared.exception.ResourceNotFoundException;
 import com.dealership.api.shared.util.CepUtils;
@@ -111,7 +112,7 @@ public class DealerService {
 
         // Desvincular veículos associados
         if (dealer.getVehicles() != null) {
-            dealer.getVehicles().forEach(v -> v.setDealer(null));
+            dealer.getVehicles().forEach(Vehicle::removeDealer);
         }
 
         dealerRepository.delete(dealer);

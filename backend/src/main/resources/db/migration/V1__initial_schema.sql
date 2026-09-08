@@ -1,4 +1,4 @@
--- Migration Initial Schema: Dealers, Vehicles, and Audit Log
+-- Migration V1: Initial Schema for Dealers, Vehicles, and System Audit Log
 
 CREATE TABLE IF NOT EXISTS dealers (
     id BIGSERIAL PRIMARY KEY,
@@ -19,13 +19,14 @@ CREATE TABLE IF NOT EXISTS vehicles (
     model VARCHAR(100) NOT NULL,
     year INTEGER NOT NULL,
     plate VARCHAR(10) NOT NULL UNIQUE,
+    color VARCHAR(50) NOT NULL DEFAULT 'Não informada',
     fuel_type VARCHAR(20) NOT NULL,
     dealer_id BIGINT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_vehicles_dealer FOREIGN KEY (dealer_id) 
         REFERENCES dealers(id) ON DELETE SET NULL,
-    CONSTRAINT chk_fuel_type CHECK (
+    CONSTRAINT chk_vehicles_fuel_type CHECK (
         fuel_type IN ('GASOLINA', 'ETANOL', 'FLEX', 'DIESEL', 'ELETRICO', 'HIBRIDO')
     )
 );
@@ -34,11 +35,11 @@ CREATE TABLE IF NOT EXISTS audit_log (
     id BIGSERIAL PRIMARY KEY,
     entity_type VARCHAR(50) NOT NULL,
     entity_id BIGINT NOT NULL,
-    action VARCHAR(20) NOT NULL,
+    action VARCHAR(50) NOT NULL,
     payload TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+-- Essential Performance Indexes (Removed redundant UNIQUE index on dealers.cnpj)
 CREATE INDEX idx_vehicles_dealer_id ON vehicles(dealer_id);
-CREATE INDEX idx_dealers_cnpj ON dealers(cnpj);
 CREATE INDEX idx_audit_entity ON audit_log(entity_type, entity_id);

@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { useForm } from "react-hook-form";
 
 import { Alert, AlertTitle, AlertDescription } from "../alert";
@@ -51,8 +50,7 @@ describe("shadcn UI Components", () => {
       expect(screen.getByText("Outline Badge")).toBeInTheDocument();
     });
 
-    it("should render Button variants and handle clicks", async () => {
-      const user = userEvent.setup();
+    it("should render Button variants and handle clicks", () => {
       const handleClick = vi.fn();
 
       render(
@@ -62,7 +60,7 @@ describe("shadcn UI Components", () => {
       );
 
       const btn = screen.getByRole("button", { name: "Click Me" });
-      await user.click(btn);
+      fireEvent.click(btn);
 
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
@@ -171,9 +169,7 @@ describe("shadcn UI Components", () => {
   });
 
   describe("AlertDialog & Dialog & Sheet & DropdownMenu", () => {
-    it("should render AlertDialog compound components", async () => {
-      const user = userEvent.setup();
-
+    it("should render AlertDialog compound components", () => {
       render(
         <AlertDialog>
           <AlertDialogTrigger>Open Alert</AlertDialogTrigger>
@@ -190,13 +186,11 @@ describe("shadcn UI Components", () => {
         </AlertDialog>
       );
 
-      await user.click(screen.getByRole("button", { name: "Open Alert" }));
+      fireEvent.click(screen.getByRole("button", { name: "Open Alert" }));
       expect(screen.getByText("Are you sure?")).toBeInTheDocument();
     });
 
-    it("should render Sheet with different sides", async () => {
-      const user = userEvent.setup();
-
+    it("should render Sheet with different sides", () => {
       render(
         <Sheet>
           <SheetTrigger>Open Sheet</SheetTrigger>
@@ -210,13 +204,11 @@ describe("shadcn UI Components", () => {
         </Sheet>
       );
 
-      await user.click(screen.getByRole("button", { name: "Open Sheet" }));
+      fireEvent.click(screen.getByRole("button", { name: "Open Sheet" }));
       expect(screen.getByText("Sheet Left")).toBeInTheDocument();
     });
 
     it("should render DropdownMenu items", async () => {
-      const user = userEvent.setup();
-
       render(
         <DropdownMenu>
           <DropdownMenuTrigger>Open Menu</DropdownMenuTrigger>
@@ -228,7 +220,8 @@ describe("shadcn UI Components", () => {
         </DropdownMenu>
       );
 
-      await user.click(screen.getByRole("button", { name: "Open Menu" }));
+      const trigger = screen.getByRole("button", { name: "Open Menu" });
+      fireEvent.keyDown(trigger, { key: "ArrowDown" });
       expect(screen.getByText("My Account")).toBeInTheDocument();
       expect(screen.getByText("Profile")).toBeInTheDocument();
     });
