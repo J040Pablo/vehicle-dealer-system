@@ -82,6 +82,20 @@ class SecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("Endpoint público /actuator/prometheus deve ser acessível sem token")
+    void publicEndpoint_Prometheus_ReturnsOk() throws Exception {
+        mockMvc.perform(get("/actuator/prometheus"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Endpoint público /actuator/info deve ser acessível sem token")
+    void publicEndpoint_Info_ReturnsOk() throws Exception {
+        mockMvc.perform(get("/actuator/info"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("Login com credenciais válidas do admin deve retornar 200 OK e token JWT")
     void login_ValidCredentials_Returns200AndToken() throws Exception {
         mockMvc.perform(post("/auth/login")

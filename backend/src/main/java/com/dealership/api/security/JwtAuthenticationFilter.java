@@ -36,7 +36,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return path.startsWith("/auth/") || path.startsWith("/api/auth/")
                 || requestUri.startsWith("/api/auth/") || requestUri.startsWith("/auth/")
                 || path.startsWith("/oauth2/") || path.startsWith("/login/oauth2/")
-                || requestUri.startsWith("/oauth2/") || requestUri.startsWith("/login/oauth2/");
+                || requestUri.startsWith("/oauth2/") || requestUri.startsWith("/login/oauth2/")
+                || path.startsWith("/actuator") || path.startsWith("/api/actuator")
+                || requestUri.startsWith("/api/actuator") || requestUri.startsWith("/actuator");
     }
 
     @Override

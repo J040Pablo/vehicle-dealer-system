@@ -1,3 +1,7 @@
+server:
+  servlet:
+    context-path: /api
+
 spring:
   test:
     database:
@@ -34,6 +38,21 @@ app:
     authorized-redirect-uri: http://localhost:5173/oauth2/redirect
 
 management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics,prometheus,caches"
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  endpoint:
+    health:
+      show-details: "always"
+      probes:
+        enabled: true
+    prometheus:
+      enabled: true
   health:
     redis:
       enabled: false
