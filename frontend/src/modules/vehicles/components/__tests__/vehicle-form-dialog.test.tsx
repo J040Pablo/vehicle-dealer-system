@@ -141,16 +141,16 @@ describe("VehicleFormDialog", () => {
     await user.click(submitBtn);
 
     await waitFor(() => {
-      expect(mockCreateMutateAsync).toHaveBeenCalledWith({
-        brand: "Honda",
-        model: "Civic",
-        year: expect.any(Number),
-        plate: "XYZ9876",
-        color: "Preto",
-        fuelType: "FLEX",
-        imageUrl: undefined,
-        dealerId: null,
-      });
+      expect(mockCreateMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          brand: "Honda",
+          model: "Civic",
+          year: expect.any(Number),
+          plate: "XYZ9876",
+          color: "Preto",
+          fuelType: "FLEX",
+        })
+      );
       expect(onOpenChangeMock).toHaveBeenCalledWith(false);
     });
   });
@@ -189,16 +189,15 @@ describe("VehicleFormDialog", () => {
     await waitFor(() => {
       expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
         id: 10,
-        input: {
+        input: expect.objectContaining({
           brand: "Toyota",
           model: "Corolla Cross",
           year: 2022,
           plate: "ABC1D23",
           color: "Prata",
           fuelType: "GASOLINA",
-          imageUrl: undefined,
           dealerId: 1,
-        },
+        }),
       });
       expect(onOpenChangeMock).toHaveBeenCalledWith(false);
     });

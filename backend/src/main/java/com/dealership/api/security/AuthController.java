@@ -38,7 +38,7 @@ public class AuthController {
             org.springframework.security.core.Authentication authentication,
             @Valid @RequestBody com.dealership.api.user.dto.OAuth2LinkRequestDTO dto
     ) {
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         UserResponseDTO linked = authService.linkOAuth2Account(authentication.getName(), dto);

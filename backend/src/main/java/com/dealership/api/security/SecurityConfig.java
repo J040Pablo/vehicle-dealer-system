@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/oauth2/link", "/api/auth/oauth2/link").authenticated()
                         .requestMatchers(
                                 "/auth/**",
                                 "/api/auth/**",
@@ -60,7 +61,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
-                                "/actuator/health"
+                                "/actuator/**",
+                                "/api/actuator/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/dealer/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/vehicles/**").hasRole("ADMIN")

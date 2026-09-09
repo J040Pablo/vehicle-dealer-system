@@ -8,6 +8,8 @@ export interface Vehicle {
   plate: string;
   color: string;
   fuelType: FuelType;
+  chassis?: string | null;
+  value?: number | null;
   imageUrl?: string | null;
   dealerId: number | null;
   dealerName: string | null;
@@ -22,6 +24,8 @@ export interface VehicleInput {
   plate: string;
   color: string;
   fuelType: FuelType;
+  chassis?: string | null;
+  value?: number | null;
   imageUrl?: string | null;
   dealerId: number | null;
 }

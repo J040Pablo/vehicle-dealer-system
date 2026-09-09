@@ -155,7 +155,7 @@ describe("DealersPage", () => {
   it("should render view vehicles button", () => {
     renderComponent();
 
-    const viewVehiclesBtn = screen.getByRole("button", { name: "Ver veículos vinculados da concessionária Concessionária Alfa" });
+    const viewVehiclesBtn = screen.getByRole("button", { name: "Ver 3 veículos da concessionária Concessionária Alfa" });
     expect(viewVehiclesBtn).toBeInTheDocument();
   });
 });

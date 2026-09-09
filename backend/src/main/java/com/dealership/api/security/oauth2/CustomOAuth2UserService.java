@@ -80,7 +80,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             );
         }
 
-        // 1. Busca pelo vínculo explícito do providerId
+        // 1. Busca pelo vínculo explícito do providerId (Cenário 1)
         Optional<User> userOptional = userRepository.findByProviderAndProviderId(AuthProvider.GOOGLE, providerId);
 
         User user;
@@ -88,36 +88,41 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user = userOptional.get();
             log.info("Usuário Google encontrado com sucesso: id={}, username={}", user.getId(), user.getUsername());
         } else {
-            // 2. Se não encontrado por providerId, verifica se e-mail ou username já existem para evitar hijacking
-            if (email != null && userRepository.findByEmail(email).isPresent()) {
-                log.warn("Tentativa de auto-linking cego bloqueada para o e-mail: {}", email);
-                throw new OAuth2AuthenticationException(
-                        new OAuth2Error("account_linking_required"),
-                        "Esta conta de e-mail já existe no sistema. Faça login com usuário e senha para realizar a vinculação explícita."
-                );
+            // 2. Se não encontrado por providerId, verifica se conta local com mesmo e-mail já existe para auto-linking seguro (Cenário 2)
+            Optional<User> localUserOptional = userRepository.findByEmail(email);
+
+            if (localUserOptional.isPresent()) {
+                if (!Boolean.TRUE.equals(emailVerified)) {
+                    log.warn("Tentativa de auto-linking com e-mail não verificado bloqueada: {}", email);
+                    throw new OAuth2AuthenticationException(
+                            new OAuth2Error("email_not_verified"),
+                            "O e-mail associado à conta Google não foi verificado."
+                    );
+                }
+                user = localUserOptional.get();
+                user.setProvider(AuthProvider.GOOGLE);
+                user.setProviderId(providerId);
+                user = userRepository.save(user);
+                log.info("OAuth2 auto-linking realizado com sucesso para usuário {}", email);
+            } else {
+                // 3. Registra novo usuário garantindo obrigatoriamente a Role USER e hash aleatório de senha (Cenário 3)
+                String candidateUsername = email != null ? email : "google_" + providerId;
+                if (userRepository.existsByUsername(candidateUsername)) {
+                    candidateUsername = "google_" + providerId;
+                }
+
+                user = User.builder()
+                        .username(candidateUsername)
+                        .email(email)
+                        .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                        .role(Role.USER)
+                        .provider(AuthProvider.GOOGLE)
+                        .providerId(providerId)
+                        .build();
+
+                user = userRepository.save(user);
+                log.info("Novo usuário Google cadastrado com sucesso: id={}, username={}, role={}", user.getId(), user.getUsername(), user.getRole());
             }
-
-            String candidateUsername = email != null ? email : "google_" + providerId;
-            if (userRepository.existsByUsername(candidateUsername)) {
-                log.warn("Username já em uso por conta local: {}", candidateUsername);
-                throw new OAuth2AuthenticationException(
-                        new OAuth2Error("account_linking_required"),
-                        "O nome de usuário derivado da conta Google já está em uso localmente."
-                );
-            }
-
-            // 3. Registra novo usuário garantindo obrigatoriamente a Role USER e hash aleatório de senha
-            user = User.builder()
-                    .username(candidateUsername)
-                    .email(email)
-                    .password(passwordEncoder.encode(UUID.randomUUID().toString()))
-                    .role(Role.USER)
-                    .provider(AuthProvider.GOOGLE)
-                    .providerId(providerId)
-                    .build();
-
-            user = userRepository.save(user);
-            log.info("Novo usuário Google cadastrado com sucesso: id={}, username={}, role={}", user.getId(), user.getUsername(), user.getRole());
         }
 
         return new CustomOAuth2User(user, oAuth2User.getAttributes());

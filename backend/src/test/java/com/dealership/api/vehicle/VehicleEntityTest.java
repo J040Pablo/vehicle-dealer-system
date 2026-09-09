@@ -70,8 +70,10 @@ class VehicleEntityTest {
         Vehicle noArgsVehicle = new Vehicle();
         assertThat(noArgsVehicle).isNotNull();
 
-        Vehicle allArgsVehicle = new Vehicle(10L, "Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, "https://example.com/car.jpg", null, null, null);
+        Vehicle allArgsVehicle = new Vehicle(10L, "Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, "CHASSI123", java.math.BigDecimal.valueOf(85000), "https://example.com/car.jpg", null, null, null);
         assertThat(allArgsVehicle.getId()).isEqualTo(10L);
+        assertThat(allArgsVehicle.getChassis()).isEqualTo("CHASSI123");
+        assertThat(allArgsVehicle.getValue()).isEqualTo(java.math.BigDecimal.valueOf(85000));
         assertThat(allArgsVehicle.getImageUrl()).isEqualTo("https://example.com/car.jpg");
     }
 }

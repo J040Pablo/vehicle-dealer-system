@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Building2, Eye, Pencil, Trash2 } from "lucide-react";
+import { Building2, Pencil, Trash2, ArrowRight } from "lucide-react";
 
 import {
   Table,
@@ -11,7 +11,6 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import { Button } from "@/shared/components/ui/button";
-import { Badge } from "@/shared/components/ui/badge";
 import { EmptyState } from "@/shared/components/empty-state";
 import { DealerTableSkeleton } from "@/shared/components/skeletons/dealer-table-skeleton";
 import { PaginationControls } from "@/shared/components/pagination-controls";
@@ -118,8 +117,8 @@ export function DealerTable({
               <TableHead className="w-[170px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">CNPJ</TableHead>
               <TableHead className="w-[140px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cidade</TableHead>
               <TableHead className="w-[80px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">UF</TableHead>
-              <TableHead className="w-[120px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Veículos</TableHead>
-              <TableHead className="text-right w-[120px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ações</TableHead>
+              <TableHead className="w-[130px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Veículos</TableHead>
+              <TableHead className="text-right w-[100px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border/60">
@@ -136,37 +135,25 @@ export function DealerTable({
                 <TableCell className="text-muted-foreground font-medium">{dealer.state}</TableCell>
                 <TableCell>
                   <Link
-                    to={`/vehicles?dealerId=${dealer.id}`}
+                    to={`/veiculos?dealerId=${dealer.id}`}
                     onClick={() => onViewVehicles?.(dealer)}
                     className="inline-flex"
                   >
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="font-semibold px-2.5 py-0.5 h-7 cursor-pointer hover:bg-secondary/80"
-                      title={`Ver ${dealer.totalVehicles} veículos no catálogo`}
+                      className="font-semibold px-2.5 py-0.5 h-7 cursor-pointer hover:bg-secondary/80 focus-visible:ring-2 focus-visible:ring-ring gap-1 text-xs"
+                      aria-label={`Ver ${dealer.totalVehicles} ${dealer.totalVehicles === 1 ? "veículo" : "veículos"} da concessionária ${dealer.name}`}
                     >
-                      {dealer.totalVehicles} {dealer.totalVehicles === 1 ? "veículo" : "veículos"}
+                      <span>
+                        {dealer.totalVehicles} {dealer.totalVehicles === 1 ? "veículo" : "veículos"}
+                      </span>
+                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-transform group-hover:translate-x-0.5" />
                     </Button>
                   </Link>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    <Link
-                      to={`/vehicles?dealerId=${dealer.id}`}
-                      onClick={() => onViewVehicles?.(dealer)}
-                      className="inline-flex"
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Ver veículos vinculados da concessionária ${dealer.name}`}
-                        title="Ver veículos no catálogo"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </Link>
                     <Button
                       variant="ghost"
                       size="icon"
