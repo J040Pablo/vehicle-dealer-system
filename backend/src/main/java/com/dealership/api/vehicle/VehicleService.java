@@ -32,7 +32,7 @@ public class VehicleService {
     private final VehicleMapper vehicleMapper;
     private final DealerService dealerService;
     private final ApplicationEventPublisher eventPublisher;
-    private final com.dealership.api.config.S3StorageService s3StorageService;
+    private final com.dealership.api.config.StorageService storageService;
 
     @Transactional(readOnly = true)
     @Cacheable(
@@ -240,10 +240,10 @@ public class VehicleService {
         log.info("Upload de imagem para veículo ID={}", id);
         Vehicle vehicle = getVehicleEntity(id);
         if (vehicle.getImageUrl() != null) {
-            s3StorageService.deleteVehicleImage(vehicle.getImageUrl());
+            storageService.deleteVehicleImage(vehicle.getImageUrl());
         }
         try {
-            String imageUrl = s3StorageService.uploadVehicleImage(id, file);
+            String imageUrl = storageService.uploadVehicleImage(id, file);
             vehicle.setImageUrl(imageUrl);
             Vehicle updated = vehicleRepository.save(vehicle);
             eventPublisher.publishEvent(new AuditEvent("VEHICLE", id, "IMAGE_UPLOAD", "Uploaded image: " + imageUrl));
@@ -263,7 +263,7 @@ public class VehicleService {
         log.info("Removendo imagem do veículo ID={}", id);
         Vehicle vehicle = getVehicleEntity(id);
         if (vehicle.getImageUrl() != null) {
-            s3StorageService.deleteVehicleImage(vehicle.getImageUrl());
+            storageService.deleteVehicleImage(vehicle.getImageUrl());
             vehicle.setImageUrl(null);
             Vehicle updated = vehicleRepository.save(vehicle);
             eventPublisher.publishEvent(new AuditEvent("VEHICLE", id, "IMAGE_DELETE", "Deleted vehicle image"));
@@ -283,7 +283,7 @@ public class VehicleService {
 
         Vehicle vehicle = getVehicleEntity(id);
         if (vehicle.getImageUrl() != null) {
-            s3StorageService.deleteVehicleImage(vehicle.getImageUrl());
+            storageService.deleteVehicleImage(vehicle.getImageUrl());
         }
         vehicleRepository.delete(vehicle);
 
@@ -295,6 +295,12 @@ public class VehicleService {
                 id,
                 "DELETE",
                 "Deleted Vehicle ID: " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public com.dealership.api.config.PresignedUrlDTO generatePresignedUrl(Long id, String filename) {
+        getVehicleEntity(id); // Valida existência do veículo
+        return storageService.generatePresignedUploadUrl(id, filename);
     }
 
     private Vehicle getVehicleEntity(Long id) {

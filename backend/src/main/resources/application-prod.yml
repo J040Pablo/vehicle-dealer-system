@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+aws:
+  dynamodb:
+    enabled: true
+    audit-table: ${AWS_DYNAMODB_AUDIT_TABLE}
+  s3:
+    bucket-name: ${AWS_S3_BUCKET_NAME}
+
+logging:
+  level:
+    root: INFO
+    com.dealership.api: INFO
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","logger":"%logger","correlationId":"%X{correlationId:-NO_CORRELATION}","message":"%msg"}%n'

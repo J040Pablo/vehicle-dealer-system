@@ -12,4 +12,5 @@ RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 COPY --from=builder /app/target/vehicle-dealer-api-1.0.0.jar app.jar
 EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/actuator/health/liveness || exit 1
 ENTRYPOINT ["java", "-jar", "app.jar"]
