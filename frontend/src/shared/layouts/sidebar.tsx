@@ -6,6 +6,7 @@ import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { ThemeToggle } from "@/shared/components/theme-toggle";
+import { Logo } from "@/shared/components/logo";
 
 interface NavItem {
   to: string;
@@ -51,27 +52,7 @@ export function Sidebar({
       <div className="flex flex-col">
         {/* Minimalist Logo Header */}
         <div className="flex h-16 shrink-0 items-center px-4 border-b border-border/60">
-          {!collapsed ? (
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-foreground text-background font-bold text-base shadow-sm tracking-tight">
-                V
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold tracking-tight text-foreground truncate">
-                  Vehicle Dealer
-                </span>
-                <span className="text-[11px] font-medium text-muted-foreground truncate">
-                  Vehicle Management System
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="mx-auto">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background font-bold text-base shadow-sm">
-                V
-              </div>
-            </div>
-          )}
+          <Logo size="md" iconOnly={collapsed} className={collapsed ? "mx-auto" : ""} />
         </div>
 
         {/* Main Navigation Items (No Category Heading) */}

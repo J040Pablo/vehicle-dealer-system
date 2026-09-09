@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
     brand VARCHAR(100) NOT NULL,
     model VARCHAR(100) NOT NULL,
     year INTEGER NOT NULL,
-    plate VARCHAR(10) NOT NULL UNIQUE,
+    plate VARCHAR(7) NOT NULL UNIQUE,
     color VARCHAR(50) NOT NULL DEFAULT 'Não informada',
     fuel_type VARCHAR(20) NOT NULL,
     dealer_id BIGINT,

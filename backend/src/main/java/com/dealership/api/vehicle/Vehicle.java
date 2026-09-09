@@ -30,7 +30,7 @@ public class Vehicle {
     @Column(name = "year", nullable = false)
     private Integer year;
 
-    @Column(name = "plate", nullable = false, unique = true, length = 10)
+    @Column(name = "plate", nullable = false, unique = true, length = 7)
     private String plate;
 
     @Column(name = "color", nullable = false, length = 50)

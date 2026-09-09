@@ -9,8 +9,9 @@ import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
 import { Separator } from "@/shared/components/ui/separator";
-import { Avatar } from "@/shared/components/ui/avatar";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/components/ui/tabs";
 import { ThemeToggle } from "@/shared/components/theme-toggle";
+import { Logo } from "@/shared/components/logo";
 
 import { loginSchema, registerSchema, type LoginCredentials, type RegisterCredentials } from "../types/auth";
 import { useLogin, useRegister } from "../hooks/use-auth";
@@ -81,16 +82,13 @@ export function LoginPage() {
         <Card className="w-full shadow-lg border-border/80 bg-card">
           {/* Header: Logo & Title */}
           <CardHeader className="space-y-3 text-center pb-4">
-            <div className="flex items-center justify-center">
-              <Avatar
-                className="h-14 w-14 rounded-xl bg-foreground text-background font-bold text-xl shadow-md border-0"
-                fallback="V"
-              />
+            <div className="flex items-center justify-center pt-2">
+              <Logo size="lg" iconOnly />
             </div>
 
             <div className="space-y-1">
               <CardTitle className="text-2xl font-bold tracking-tight text-foreground">
-                Vehicle Dealer
+                Vehicle Dealer System
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
                 {mode === "login"
@@ -99,36 +97,36 @@ export function LoginPage() {
               </CardDescription>
             </div>
 
-            {/* Mode Switcher Tabs */}
-            <div className="grid w-full grid-cols-2 p-1 bg-muted rounded-lg text-xs font-semibold mt-2">
-              <Button
-                type="button"
-                variant={mode === "login" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => switchMode("login")}
-                className="h-8 text-xs font-medium rounded-md transition-all"
-              >
-                <LogIn className="mr-1.5 h-3.5 w-3.5" />
-                Entrar
-              </Button>
-              <Button
-                type="button"
-                variant={mode === "register" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => switchMode("register")}
-                className="h-8 text-xs font-medium rounded-md transition-all"
-              >
-                <UserPlus className="mr-1.5 h-3.5 w-3.5" />
-                Cadastrar
-              </Button>
-            </div>
+            {/* Official shadcn/ui Tabs Component */}
+            <Tabs
+              value={mode}
+              onValueChange={(val) => switchMode(val as AuthMode)}
+              className="w-full pt-2"
+            >
+              <TabsList className="grid w-full grid-cols-2 h-10 p-1 bg-muted rounded-lg">
+                <TabsTrigger
+                  value="login"
+                  className="text-xs font-semibold gap-1.5 transition-all"
+                >
+                  <LogIn className="h-3.5 w-3.5" />
+                  Entrar
+                </TabsTrigger>
+                <TabsTrigger
+                  value="register"
+                  className="text-xs font-semibold gap-1.5 transition-all"
+                >
+                  <UserPlus className="h-3.5 w-3.5" />
+                  Cadastrar
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </CardHeader>
 
           <div className="px-6">
             <Separator />
           </div>
 
-          {/* Content: Feedback Alerts & Form */}
+          {/* Content: Feedback Alerts & Forms */}
           <CardContent className="space-y-4 pt-6">
             {/* Success Alert after Registration */}
             {registerSuccessMessage && mode === "login" && (

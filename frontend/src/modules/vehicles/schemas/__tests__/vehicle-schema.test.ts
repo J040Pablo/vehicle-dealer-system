@@ -14,18 +14,25 @@ describe("vehicleSchema", () => {
     dealerId: 1,
   };
 
-  it("should validate a valid vehicle form payload", () => {
-    const validData = {
+  it("should validate a valid vehicle form payload (Traditional & Mercosul)", () => {
+    const validMercosul = {
       ...validBaseVehicle,
-      plate: "abc1d23",
+      plate: "ABC1D23",
     };
 
-    const result = vehicleSchema.safeParse(validData);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.plate).toBe("ABC1D23");
-      expect(result.data.brand).toBe("Toyota");
+    const resultMercosul = vehicleSchema.safeParse(validMercosul);
+    expect(resultMercosul.success).toBe(true);
+    if (resultMercosul.success) {
+      expect(resultMercosul.data.plate).toBe("ABC1D23");
+      expect(resultMercosul.data.brand).toBe("Toyota");
     }
+
+    const validTraditional = {
+      ...validBaseVehicle,
+      plate: "ABC1234",
+    };
+    const resultTraditional = vehicleSchema.safeParse(validTraditional);
+    expect(resultTraditional.success).toBe(true);
   });
 
   it("should allow null dealerId", () => {

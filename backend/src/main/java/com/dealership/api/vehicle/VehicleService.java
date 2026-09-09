@@ -3,6 +3,7 @@ package com.dealership.api.vehicle;
 import com.dealership.api.dealer.Dealer;
 import com.dealership.api.dealer.DealerService;
 import com.dealership.api.shared.audit.AuditEvent;
+import com.dealership.api.shared.exception.BusinessException;
 import com.dealership.api.shared.exception.DuplicatePlateException;
 import com.dealership.api.shared.exception.ResourceNotFoundException;
 import com.dealership.api.vehicle.dto.VehicleRequestDTO;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -69,19 +71,42 @@ public class VehicleService {
         return vehicleMapper.toDTO(vehicle);
     }
 
+    private static final Pattern PLATE_PATTERN = Pattern.compile("^(?:[A-Z]{3}[0-9]{4}|[A-Z]{3}[0-9][A-Z][0-9]{2})$");
+
+    private String normalizePlate(String plate) {
+        if (plate == null) return null;
+        return plate.replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
+    }
+
+    private String validateAndNormalizePlate(String rawPlate) {
+        if (rawPlate == null || rawPlate.isBlank()) {
+            throw new BusinessException("A placa do veículo é obrigatória.");
+        }
+        String normalized = normalizePlate(rawPlate);
+        if (!PLATE_PATTERN.matcher(normalized).matches()) {
+            throw new BusinessException("Placa inválida. Use ABC1234 ou ABC1D23.");
+        }
+        return normalized;
+    }
+
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "filters", allEntries = true),
             @CacheEvict(value = "dashboard", allEntries = true)
     })
     public VehicleResponseDTO create(VehicleRequestDTO dto) {
-        log.info("Cadastrando veículo: Marca={} Modelo={} Placa={}", dto.brand(), dto.model(), dto.plate());
+        String normalizedPlate = validateAndNormalizePlate(dto.plate());
+        log.info("Cadastrando veículo: Marca={} Modelo={} Placa={}", dto.brand(), dto.model(), normalizedPlate);
 
-        if (vehicleRepository.existsByPlate(dto.plate())) {
-            throw new DuplicatePlateException(dto.plate());
+        if (vehicleRepository.existsByPlate(normalizedPlate)) {
+            throw new DuplicatePlateException(normalizedPlate);
         }
 
-        Vehicle vehicle = vehicleMapper.toEntity(dto);
+        VehicleRequestDTO normalizedDto = new VehicleRequestDTO(
+                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), dto.dealerId()
+        );
+
+        Vehicle vehicle = vehicleMapper.toEntity(normalizedDto);
 
         if (dto.dealerId() != null) {
             Dealer dealer = dealerService.getDealerEntity(dto.dealerId());
@@ -114,11 +139,16 @@ public class VehicleService {
         Vehicle vehicle = getVehicleEntity(id);
         Long previousDealerId = vehicle.getDealer() != null ? vehicle.getDealer().getId() : null;
 
-        if (vehicleRepository.existsByPlateAndIdNot(dto.plate(), id)) {
-            throw new DuplicatePlateException(dto.plate());
+        String normalizedPlate = validateAndNormalizePlate(dto.plate());
+        if (vehicleRepository.existsByPlateAndIdNot(normalizedPlate, id)) {
+            throw new DuplicatePlateException(normalizedPlate);
         }
 
-        vehicleMapper.updateEntityFromDTO(dto, vehicle);
+        VehicleRequestDTO normalizedDto = new VehicleRequestDTO(
+                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), dto.dealerId()
+        );
+
+        vehicleMapper.updateEntityFromDTO(normalizedDto, vehicle);
 
         if (dto.dealerId() != null) {
             Dealer dealer = dealerService.getDealerEntity(dto.dealerId());

@@ -15,6 +15,7 @@ import { Input } from "@/shared/components/ui/input";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -36,6 +37,16 @@ interface VehicleFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   vehicle?: Vehicle | null;
+}
+
+function formatPlateInput(input: string): string {
+  if (!input) return "";
+  return input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toUpperCase()
+    .slice(0, 7);
 }
 
 export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDialogProps) {
@@ -156,10 +167,14 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
                     <FormControl>
                       <Input
                         placeholder="ABC1D23"
+                        maxLength={7}
                         {...field}
-                        onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        onChange={(e) => field.onChange(formatPlateInput(e.target.value))}
                       />
                     </FormControl>
+                    <FormDescription className="text-[11px]">
+                      Formato tradicional (ABC1234) ou Mercosul (ABC1D23)
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

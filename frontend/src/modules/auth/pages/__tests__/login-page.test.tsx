@@ -77,7 +77,7 @@ describe("LoginPage", () => {
   it("should switch mode to registration when clicking Cadastrar tab", async () => {
     const { user } = renderComponent();
 
-    const registerTab = screen.getByRole("button", { name: "Cadastrar" });
+    const registerTab = screen.getByRole("tab", { name: "Cadastrar" });
     await user.click(registerTab);
 
     expect(screen.getByText("Preencha os dados abaixo para criar sua conta")).toBeInTheDocument();
@@ -107,7 +107,7 @@ describe("LoginPage", () => {
   it("should submit registration credentials when submitting valid register form", async () => {
     const { user } = renderComponent();
 
-    const registerTab = screen.getByRole("button", { name: "Cadastrar" });
+    const registerTab = screen.getByRole("tab", { name: "Cadastrar" });
     await user.click(registerTab);
 
     await user.type(screen.getByPlaceholderText("Escolha um nome de usuário..."), "newuser");
@@ -131,7 +131,7 @@ describe("LoginPage", () => {
   it("should switch back to login mode and show success message when register callback fires", async () => {
     const { user } = renderComponent();
 
-    const registerTab = screen.getByRole("button", { name: "Cadastrar" });
+    const registerTab = screen.getByRole("tab", { name: "Cadastrar" });
     await user.click(registerTab);
 
     await user.type(screen.getByPlaceholderText("Escolha um nome de usuário..."), "registered_user");
@@ -150,7 +150,7 @@ describe("LoginPage", () => {
   it("should render Continuar com Google button when switching to registration tab", async () => {
     const { user } = renderComponent();
 
-    const registerTab = screen.getByRole("button", { name: "Cadastrar" });
+    const registerTab = screen.getByRole("tab", { name: "Cadastrar" });
     await user.click(registerTab);
 
     expect(screen.getByRole("button", { name: "Continuar com Google" })).toBeInTheDocument();
