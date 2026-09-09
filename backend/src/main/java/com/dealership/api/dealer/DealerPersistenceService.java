@@ -11,6 +11,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dealership.api.shared.exception.BusinessException;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -19,6 +21,23 @@ public class DealerPersistenceService {
     private final DealerRepository dealerRepository;
     private final DealerMapper dealerMapper;
     private final ApplicationEventPublisher eventPublisher;
+
+    private String normalizeImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return null;
+        }
+        String trimmed = imageUrl.trim();
+        try {
+            java.net.URI uri = java.net.URI.create(trimmed);
+            String scheme = uri.getScheme();
+            if (scheme == null || (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https"))) {
+                throw new BusinessException("URL de imagem inválida.");
+            }
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException("URL de imagem inválida.");
+        }
+        return trimmed;
+    }
 
     @Transactional
     public DealerResponseDTO saveNewDealer(DealerRequestDTO dto, String cleanCnpj, String cleanCep, ViaCepResponseDTO addressDTO) {
@@ -33,6 +52,7 @@ public class DealerPersistenceService {
         dealer.setNeighborhood(addressDTO.neighborhood());
         dealer.setCity(addressDTO.city());
         dealer.setState(addressDTO.state());
+        dealer.setImageUrl(normalizeImageUrl(dto.imageUrl()));
 
         Dealer saved = dealerRepository.save(dealer);
         log.info("Evento de negócio: operation=DEALER_CREATED entityId={} name={} cnpj={}", saved.getId(), saved.getName(), saved.getCnpj());
@@ -59,6 +79,7 @@ public class DealerPersistenceService {
         dealer.setNeighborhood(addressDTO.neighborhood());
         dealer.setCity(addressDTO.city());
         dealer.setState(addressDTO.state());
+        dealer.setImageUrl(normalizeImageUrl(dto.imageUrl()));
 
         Dealer updated = dealerRepository.save(dealer);
         log.info("Evento de negócio: operation=DEALER_UPDATED entityId={} name={} cnpj={}", updated.getId(), updated.getName(), updated.getCnpj());

@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Car, Pencil, Trash2 } from "lucide-react";
 
 import {
@@ -24,6 +26,7 @@ interface VehicleTableProps {
   onEdit: (vehicle: Vehicle) => void;
   onDelete: (vehicle: Vehicle) => void;
   onCreate: () => void;
+  onSelectDealer?: (dealerId: number) => void;
   // Pagination props
   page?: number;
   totalPages?: number;
@@ -35,6 +38,30 @@ interface VehicleTableProps {
   isLast?: boolean;
 }
 
+function VehicleThumbnail({ url, brand, model }: { url?: string | null; brand: string; model: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!url || hasError) {
+    return (
+      <div className="h-14 w-24 shrink-0 rounded-md border border-border bg-muted/30 flex items-center justify-center text-muted-foreground/60 shadow-xs overflow-hidden">
+        <Car className="h-5 w-5 text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-14 w-24 shrink-0 overflow-hidden rounded-md border border-border bg-muted/30 flex items-center justify-center shadow-xs">
+      <img
+        src={url}
+        alt={`${brand} ${model}`}
+        loading="lazy"
+        onError={() => setHasError(true)}
+        className="h-full w-full object-contain"
+      />
+    </div>
+  );
+}
+
 export function VehicleTable({
   vehicles,
   isFiltered = false,
@@ -43,6 +70,7 @@ export function VehicleTable({
   onEdit,
   onDelete,
   onCreate,
+  onSelectDealer,
   page = 0,
   totalPages = 1,
   totalElements = 0,
@@ -86,6 +114,7 @@ export function VehicleTable({
         <Table className="min-w-[680px]">
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b border-border/80 bg-muted/30">
+              <TableHead className="w-[90px]"></TableHead>
               <TableHead className="w-[130px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Marca</TableHead>
               <TableHead className="w-[150px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Modelo</TableHead>
               <TableHead className="w-[90px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ano</TableHead>
@@ -99,6 +128,9 @@ export function VehicleTable({
           <TableBody className="divide-y divide-border/60">
             {vehicles.map((vehicle) => (
               <TableRow key={vehicle.id} className="transition-colors hover:bg-muted/40 group">
+                <TableCell className="py-2.5 pl-4 pr-0">
+                  <VehicleThumbnail url={vehicle.imageUrl} brand={vehicle.brand} model={vehicle.model} />
+                </TableCell>
                 <TableCell className="font-semibold text-foreground">{vehicle.brand}</TableCell>
                 <TableCell className="text-foreground/90">{vehicle.model}</TableCell>
                 <TableCell className="text-muted-foreground">{vehicle.year}</TableCell>
@@ -108,8 +140,15 @@ export function VehicleTable({
                   <FuelBadge fuelType={vehicle.fuelType} />
                 </TableCell>
                 <TableCell>
-                  {vehicle.dealerName ? (
-                    <span className="text-foreground font-medium">{vehicle.dealerName}</span>
+                  {vehicle.dealerName && vehicle.dealerId ? (
+                    <Link
+                      to={`/vehicles?dealerId=${vehicle.dealerId}`}
+                      onClick={() => vehicle.dealerId && onSelectDealer?.(vehicle.dealerId)}
+                      className="text-foreground font-medium hover:underline text-left cursor-pointer hover:text-primary transition-colors"
+                      title={`Filtrar veículos da concessionária ${vehicle.dealerName}`}
+                    >
+                      {vehicle.dealerName}
+                    </Link>
                   ) : (
                     <span className="text-muted-foreground/70 italic text-xs">Sem concessionária</span>
                   )}

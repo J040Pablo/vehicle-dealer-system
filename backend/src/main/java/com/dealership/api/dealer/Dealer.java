@@ -46,6 +46,9 @@ public class Dealer {
     @Column(name = "state", nullable = false, length = 2)
     private String state;
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     @OneToMany(mappedBy = "dealer", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Vehicle> vehicles = new ArrayList<>();

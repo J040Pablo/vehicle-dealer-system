@@ -21,6 +21,18 @@ export const vehicleSchema = z.object({
   fuelType: z.enum(["GASOLINA", "ETANOL", "FLEX", "DIESEL", "ELETRICO", "HIBRIDO"], {
     errorMap: () => ({ message: "Selecione o tipo de combustível." }),
   }),
+  imageUrl: z.preprocess(
+    (value) => {
+      if (typeof value !== "string") return value;
+      const trimmed = value.trim();
+      return trimmed === "" ? undefined : trimmed;
+    },
+    z
+      .string()
+      .url("URL de imagem inválida. Deve começar com http:// ou https://")
+      .max(500, "A URL deve ter no máximo 500 caracteres.")
+      .optional()
+  ),
   dealerId: z.number().nullable(),
 });
 
@@ -33,5 +45,6 @@ export const vehicleFormDefaults: VehicleFormValues = {
   plate: "",
   color: "",
   fuelType: "FLEX",
+  imageUrl: "",
   dealerId: null,
 };

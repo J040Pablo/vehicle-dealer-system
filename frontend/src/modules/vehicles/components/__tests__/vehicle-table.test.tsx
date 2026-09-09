@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { VehicleTable } from "../vehicle-table";
 import type { Vehicle } from "@/modules/vehicles/types/vehicle";
 
@@ -13,6 +14,7 @@ const mockVehicles: Vehicle[] = [
     plate: "ABC1D23",
     color: "Prata",
     fuelType: "FLEX",
+    imageUrl: "https://example.com/corolla.jpg",
     dealerId: 1,
     dealerName: "Concessionária Alfa",
     createdAt: "2026-01-01T00:00:00Z",
@@ -26,6 +28,7 @@ const mockVehicles: Vehicle[] = [
     plate: "EV9X99",
     color: "Branco",
     fuelType: "ELETRICO",
+    imageUrl: null,
     dealerId: null,
     dealerName: null,
     createdAt: "2026-01-01T00:00:00Z",
@@ -44,7 +47,11 @@ describe("VehicleTable", () => {
   };
 
   it("should render skeleton when isLoading is true", () => {
-    const { container } = render(<VehicleTable {...defaultProps} isLoading={true} />);
+    const { container } = render(
+      <MemoryRouter>
+        <VehicleTable {...defaultProps} isLoading={true} />
+      </MemoryRouter>
+    );
     expect(screen.queryByText("Toyota")).not.toBeInTheDocument();
     expect(container.querySelectorAll(".animate-pulse").length).toBeGreaterThan(0);
   });
@@ -53,7 +60,11 @@ describe("VehicleTable", () => {
     const user = userEvent.setup();
     const onCreateMock = vi.fn();
 
-    render(<VehicleTable {...defaultProps} vehicles={[]} isFiltered={false} onCreate={onCreateMock} />);
+    render(
+      <MemoryRouter>
+        <VehicleTable {...defaultProps} vehicles={[]} isFiltered={false} onCreate={onCreateMock} />
+      </MemoryRouter>
+    );
 
     expect(screen.getByText("Nenhum veículo encontrado")).toBeInTheDocument();
     expect(screen.getByText("Cadastre o primeiro veículo para começar.")).toBeInTheDocument();
@@ -68,12 +79,14 @@ describe("VehicleTable", () => {
     const onClearFilterMock = vi.fn();
 
     render(
-      <VehicleTable
-        {...defaultProps}
-        vehicles={[]}
-        isFiltered={true}
-        onClearFilter={onClearFilterMock}
-      />
+      <MemoryRouter>
+        <VehicleTable
+          {...defaultProps}
+          vehicles={[]}
+          isFiltered={true}
+          onClearFilter={onClearFilterMock}
+        />
+      </MemoryRouter>
     );
 
     expect(screen.getByText("Nenhum veículo encontrado")).toBeInTheDocument();
@@ -84,8 +97,12 @@ describe("VehicleTable", () => {
     expect(onClearFilterMock).toHaveBeenCalledTimes(1);
   });
 
-  it("should render vehicles list with badges and dealer information", () => {
-    render(<VehicleTable {...defaultProps} />);
+  it("should render vehicles list with badges and dealer link", () => {
+    render(
+      <MemoryRouter>
+        <VehicleTable {...defaultProps} />
+      </MemoryRouter>
+    );
 
     expect(screen.getByText("Toyota")).toBeInTheDocument();
     expect(screen.getByText("Corolla")).toBeInTheDocument();
@@ -100,12 +117,45 @@ describe("VehicleTable", () => {
     expect(screen.getByText("Sem concessionária")).toBeInTheDocument();
   });
 
+  it("should render vehicle thumbnail with object-contain styling", () => {
+    render(
+      <MemoryRouter>
+        <VehicleTable {...defaultProps} />
+      </MemoryRouter>
+    );
+
+    const img = screen.getByAltText("Toyota Corolla");
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute("src", "https://example.com/corolla.jpg");
+    expect(img).toHaveClass("object-contain");
+  });
+
+  it("should trigger onSelectDealer when dealer link is clicked", async () => {
+    const user = userEvent.setup();
+    const onSelectDealerMock = vi.fn();
+
+    render(
+      <MemoryRouter>
+        <VehicleTable {...defaultProps} onSelectDealer={onSelectDealerMock} />
+      </MemoryRouter>
+    );
+
+    const dealerLink = screen.getByRole("link", { name: "Concessionária Alfa" });
+    await user.click(dealerLink);
+
+    expect(onSelectDealerMock).toHaveBeenCalledWith(1);
+  });
+
   it("should trigger edit and delete action callbacks when buttons are clicked", async () => {
     const user = userEvent.setup();
     const onEditMock = vi.fn();
     const onDeleteMock = vi.fn();
 
-    render(<VehicleTable {...defaultProps} onEdit={onEditMock} onDelete={onDeleteMock} />);
+    render(
+      <MemoryRouter>
+        <VehicleTable {...defaultProps} onEdit={onEditMock} onDelete={onDeleteMock} />
+      </MemoryRouter>
+    );
 
     const editBtn = screen.getByRole("button", { name: "Editar veículo Toyota Corolla" });
     const deleteBtn = screen.getByRole("button", { name: "Excluir veículo Toyota Corolla" });

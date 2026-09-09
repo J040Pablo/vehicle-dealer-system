@@ -21,6 +21,18 @@ export const dealerSchema = z.object({
   neighborhood: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
+  imageUrl: z.preprocess(
+    (value) => {
+      if (typeof value !== "string") return value;
+      const trimmed = value.trim();
+      return trimmed === "" ? undefined : trimmed;
+    },
+    z
+      .string()
+      .url("URL de imagem inválida. Deve começar com http:// ou https://")
+      .max(500, "A URL deve ter no máximo 500 caracteres.")
+      .optional()
+  ),
 });
 
 export type DealerFormValues = z.infer<typeof dealerSchema>;
@@ -33,4 +45,5 @@ export const dealerFormDefaults: DealerFormValues = {
   neighborhood: "",
   city: "",
   state: "",
+  imageUrl: "",
 };

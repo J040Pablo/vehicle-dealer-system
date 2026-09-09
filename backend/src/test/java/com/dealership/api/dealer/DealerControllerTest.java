@@ -128,6 +128,31 @@ class DealerControllerTest {
     }
 
     @Test
+    @DisplayName("POST /dealer - Deve cadastrar nova concessionária com imageUrl e retornar no JSON com HTTP 201")
+    void create_WithImageUrl_Success() throws Exception {
+        String imageUrl = "https://images.unsplash.com/photo-1549399542-7e3f8b79c341";
+        DealerRequestDTO dtoWithImage = new DealerRequestDTO(
+                "Concessionária SP", "62043380000107", "01001000",
+                "Praça da Sé", "Sé", "São Paulo", "SP", imageUrl
+        );
+        DealerResponseDTO responseWithImage = new DealerResponseDTO(
+                1L, "Concessionária SP", "62043380000107", "01001000",
+                "Praça da Sé", "Sé", "São Paulo", "SP", imageUrl, 5, null, null
+        );
+
+        when(dealerService.create(any(DealerRequestDTO.class))).thenReturn(responseWithImage);
+
+        mockMvc.perform(post("/dealer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dtoWithImage)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.imageUrl").value(imageUrl));
+
+        verify(dealerService, times(1)).create(any(DealerRequestDTO.class));
+    }
+
+    @Test
     @DisplayName("POST /dealer - Deve retornar HTTP 409 quando CNPJ é duplicado")
     void create_DuplicateCnpj() throws Exception {
         when(dealerService.create(any(DealerRequestDTO.class))).thenThrow(new DuplicateCnpjException("62043380000107"));

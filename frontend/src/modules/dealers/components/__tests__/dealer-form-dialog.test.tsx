@@ -131,6 +131,7 @@ describe("DealerFormDialog", () => {
         neighborhood: "",
         city: "",
         state: "",
+        imageUrl: undefined,
       });
       expect(onOpenChangeMock).toHaveBeenCalledWith(false);
     });
@@ -178,6 +179,7 @@ describe("DealerFormDialog", () => {
           neighborhood: "Bairro B",
           city: "Cidade C",
           state: "BA",
+          imageUrl: undefined,
         },
       });
       expect(onOpenChangeMock).toHaveBeenCalledWith(false);

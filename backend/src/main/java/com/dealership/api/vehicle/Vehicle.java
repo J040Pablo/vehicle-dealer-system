@@ -40,6 +40,9 @@ public class Vehicle {
     @Column(name = "fuel_type", nullable = false, length = 20)
     private FuelType fuelType;
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dealer_id")
     private Dealer dealer;

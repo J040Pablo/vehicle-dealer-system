@@ -4,6 +4,8 @@ import com.dealership.api.shared.validation.CNPJ;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+import jakarta.validation.constraints.Size;
+
 public record DealerRequestDTO(
         @NotBlank(message = "A Razão Social / Nome da concessionária é obrigatório.")
         String name,
@@ -20,9 +22,17 @@ public record DealerRequestDTO(
         String street,
         String neighborhood,
         String city,
-        String state
+        String state,
+
+        @Size(max = 500, message = "A URL da imagem deve possuir no máximo 500 caracteres.")
+        @Pattern(regexp = "^(https?://).*$", message = "URL de imagem inválida.")
+        String imageUrl
 ) {
     public DealerRequestDTO(String name, String cnpj, String cep) {
-        this(name, cnpj, cep, null, null, null, null);
+        this(name, cnpj, cep, null, null, null, null, null);
+    }
+
+    public DealerRequestDTO(String name, String cnpj, String cep, String street, String neighborhood, String city, String state) {
+        this(name, cnpj, cep, street, neighborhood, city, state, null);
     }
 }

@@ -48,6 +48,7 @@ class VehicleEntityTest {
         vehicle.setPlate("XYZ9E87");
         vehicle.setColor("Prata");
         vehicle.setFuelType(FuelType.HIBRIDO);
+        vehicle.setImageUrl("https://example.com/car.jpg");
         vehicle.setDealer(null);
         vehicle.setCreatedAt(now);
         vehicle.setUpdatedAt(now);
@@ -59,6 +60,7 @@ class VehicleEntityTest {
         assertThat(vehicle.getPlate()).isEqualTo("XYZ9E87");
         assertThat(vehicle.getColor()).isEqualTo("Prata");
         assertThat(vehicle.getFuelType()).isEqualTo(FuelType.HIBRIDO);
+        assertThat(vehicle.getImageUrl()).isEqualTo("https://example.com/car.jpg");
         assertThat(vehicle.getDealer()).isNull();
     }
 
@@ -68,7 +70,8 @@ class VehicleEntityTest {
         Vehicle noArgsVehicle = new Vehicle();
         assertThat(noArgsVehicle).isNotNull();
 
-        Vehicle allArgsVehicle = new Vehicle(10L, "Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, null, null, null);
+        Vehicle allArgsVehicle = new Vehicle(10L, "Toyota", "Corolla", 2024, "ABC1D23", "Preto", FuelType.FLEX, "https://example.com/car.jpg", null, null, null);
         assertThat(allArgsVehicle.getId()).isEqualTo(10L);
+        assertThat(allArgsVehicle.getImageUrl()).isEqualTo("https://example.com/car.jpg");
     }
 }

@@ -89,6 +89,23 @@ public class VehicleService {
         return normalized;
     }
 
+    private String normalizeImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return null;
+        }
+        String trimmed = imageUrl.trim();
+        try {
+            java.net.URI uri = java.net.URI.create(trimmed);
+            String scheme = uri.getScheme();
+            if (scheme == null || (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https"))) {
+                throw new BusinessException("URL de imagem inválida.");
+            }
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException("URL de imagem inválida.");
+        }
+        return trimmed;
+    }
+
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "filters", allEntries = true),
@@ -96,6 +113,7 @@ public class VehicleService {
     })
     public VehicleResponseDTO create(VehicleRequestDTO dto) {
         String normalizedPlate = validateAndNormalizePlate(dto.plate());
+        String normalizedImageUrl = normalizeImageUrl(dto.imageUrl());
         log.info("Cadastrando veículo: Marca={} Modelo={} Placa={}", dto.brand(), dto.model(), normalizedPlate);
 
         if (vehicleRepository.existsByPlate(normalizedPlate)) {
@@ -103,7 +121,7 @@ public class VehicleService {
         }
 
         VehicleRequestDTO normalizedDto = new VehicleRequestDTO(
-                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), dto.dealerId()
+                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), normalizedImageUrl, dto.dealerId()
         );
 
         Vehicle vehicle = vehicleMapper.toEntity(normalizedDto);
@@ -140,12 +158,13 @@ public class VehicleService {
         Long previousDealerId = vehicle.getDealer() != null ? vehicle.getDealer().getId() : null;
 
         String normalizedPlate = validateAndNormalizePlate(dto.plate());
+        String normalizedImageUrl = normalizeImageUrl(dto.imageUrl());
         if (vehicleRepository.existsByPlateAndIdNot(normalizedPlate, id)) {
             throw new DuplicatePlateException(normalizedPlate);
         }
 
         VehicleRequestDTO normalizedDto = new VehicleRequestDTO(
-                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), dto.dealerId()
+                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), normalizedImageUrl, dto.dealerId()
         );
 
         vehicleMapper.updateEntityFromDTO(normalizedDto, vehicle);

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { VehiclesPage } from "../vehicles-page";
@@ -24,6 +24,10 @@ const mockVehiclesData = {
   last: true,
 };
 
+const mockDealersData = [
+  { id: 1, name: "Concessionária Alfa" },
+];
+
 const mockUseVehiclesPaginated = vi.fn().mockReturnValue({
   data: mockVehiclesData,
   isLoading: false,
@@ -37,7 +41,7 @@ vi.mock("@/modules/vehicles/hooks/use-vehicles", () => ({
 }));
 
 vi.mock("@/modules/dealers/hooks/use-dealers", () => ({
-  useDealers: () => ({ data: [], isLoading: false }),
+  useDealers: () => ({ data: mockDealersData, isLoading: false }),
 }));
 
 vi.mock("@/modules/vehicles/hooks/use-vehicle-mutations", () => ({
@@ -46,7 +50,9 @@ vi.mock("@/modules/vehicles/hooks/use-vehicle-mutations", () => ({
   useDeleteVehicle: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
-function renderComponent() {
+import { MemoryRouter } from "react-router-dom";
+
+function renderComponent(initialEntries = ["/vehicles"]) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -55,7 +61,9 @@ function renderComponent() {
     user: userEvent.setup(),
     ...render(
       <QueryClientProvider client={queryClient}>
-        <VehiclesPage />
+        <MemoryRouter initialEntries={initialEntries}>
+          <VehiclesPage />
+        </MemoryRouter>
       </QueryClientProvider>
     ),
   };
@@ -79,6 +87,15 @@ describe("VehiclesPage", () => {
     expect(screen.getByPlaceholderText("Buscar por marca, modelo ou placa...")).toBeInTheDocument();
     expect(screen.getByText("Toyota")).toBeInTheDocument();
     expect(screen.getByText("Corolla")).toBeInTheDocument();
+  });
+
+  it("should restore filters and display active chips when initialized with URL searchParams", () => {
+    renderComponent(["/vehicles?dealerId=1&fuelType=FLEX"]);
+
+    expect(screen.getAllByText("Concessionária Alfa").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Flex").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("button", { name: "Remover filtro de concessionária" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remover filtro de combustível" })).toBeInTheDocument();
   });
 
   it("should render skeleton when isLoading is true", () => {

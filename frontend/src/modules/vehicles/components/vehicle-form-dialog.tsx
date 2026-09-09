@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Car, Plus } from "lucide-react";
 
 import {
   Dialog,
@@ -24,6 +25,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { FUEL_TYPE_OPTIONS } from "@/shared/utils/formatters";
 import { getFieldErrors } from "@/shared/api/error";
+import { ImageUrlField } from "@/shared/components/image-url-field";
+import { DealerQuickCreateDialog } from "@/modules/dealers/components/dealer-quick-create-dialog";
 import {
   vehicleFormDefaults,
   vehicleSchema,
@@ -55,6 +58,7 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
   const createVehicle = useCreateVehicle();
   const updateVehicle = useUpdateVehicle();
   const isPending = createVehicle.isPending || updateVehicle.isPending;
+  const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
 
   const form = useForm<VehicleFormValues>({
     resolver: zodResolver(vehicleSchema),
@@ -72,6 +76,7 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
             plate: vehicle.plate,
             color: vehicle.color || "",
             fuelType: vehicle.fuelType,
+            imageUrl: vehicle.imageUrl || "",
             dealerId: vehicle.dealerId,
           }
         : vehicleFormDefaults
@@ -220,12 +225,40 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
               )}
             />
 
+            {/* Image URL field */}
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <ImageUrlField
+                  label="Foto do Veículo (Opcional)"
+                  placeholder="https://exemplo.com/carro.jpg"
+                  value={field.value}
+                  onChange={field.onChange}
+                  fallbackIcon={Car}
+                  error={form.formState.errors.imageUrl?.message}
+                />
+              )}
+            />
+
             <FormField
               control={form.control}
               name="dealerId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Concessionária</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Concessionária</FormLabel>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsQuickCreateOpen(true)}
+                      className="h-6 text-xs text-primary hover:text-primary/80 gap-1 px-1.5"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Nova Concessionária
+                    </Button>
+                  </div>
                   <Select
                     onValueChange={(value) => field.onChange(value === "none" ? null : Number(value))}
                     value={field.value !== null ? String(field.value) : "none"}
@@ -259,6 +292,14 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
             </DialogFooter>
           </form>
         </Form>
+
+        <DealerQuickCreateDialog
+          open={isQuickCreateOpen}
+          onOpenChange={setIsQuickCreateOpen}
+          onSuccess={(createdDealer) => {
+            form.setValue("dealerId", createdDealer.id, { shouldValidate: true, shouldDirty: true });
+          }}
+        />
       </DialogContent>
     </Dialog>
   );
