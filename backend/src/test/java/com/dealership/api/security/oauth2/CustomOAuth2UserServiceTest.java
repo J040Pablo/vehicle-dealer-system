@@ -116,4 +116,70 @@ class CustomOAuth2UserServiceTest {
         assertEquals("newuser@example.com", result.getName());
         verify(userRepository, times(1)).save(any(User.class));
     }
+
+    @Test
+    @DisplayName("Devia realizar login normalmente quando a conta Google já estiver vinculada pelo providerId")
+    void processOAuth2User_AlreadyLinked_Success() {
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("sub", "google_12345");
+        attributes.put("email", "existing@example.com");
+        attributes.put("email_verified", true);
+
+        OAuth2UserRequest request = new OAuth2UserRequest(clientRegistration, accessToken);
+        OAuth2User mockOAuth2User = new DefaultOAuth2User(Collections.emptyList(), attributes, "sub");
+
+        User existingLinkedUser = User.builder()
+                .id(10L)
+                .username("existinguser")
+                .email("existing@example.com")
+                .role(Role.USER)
+                .provider(AuthProvider.GOOGLE)
+                .providerId("google_12345")
+                .build();
+
+        when(userRepository.findByProviderAndProviderId(AuthProvider.GOOGLE, "google_12345"))
+                .thenReturn(Optional.of(existingLinkedUser));
+
+        OAuth2User result = customOAuth2UserService.processOAuth2User(request, mockOAuth2User);
+
+        assertNotNull(result);
+        assertEquals("existinguser", result.getName());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Devia realizar auto-linking seguro quando usuário local com mesmo e-mail verificado for encontrado")
+    void processOAuth2User_LocalUserWithVerifiedEmail_AutoLinksSuccessfully() {
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("sub", "google_98765");
+        attributes.put("email", "localuser@example.com");
+        attributes.put("email_verified", true);
+
+        OAuth2UserRequest request = new OAuth2UserRequest(clientRegistration, accessToken);
+        OAuth2User mockOAuth2User = new DefaultOAuth2User(Collections.emptyList(), attributes, "sub");
+
+        User localUser = User.builder()
+                .id(20L)
+                .username("localuser")
+                .email("localuser@example.com")
+                .password("hashed_local_password")
+                .role(Role.ADMIN) // Role ADMIN mantida intacta
+                .provider(AuthProvider.LOCAL)
+                .build();
+
+        when(userRepository.findByProviderAndProviderId(AuthProvider.GOOGLE, "google_98765"))
+                .thenReturn(Optional.empty());
+        when(userRepository.findByEmail("localuser@example.com"))
+                .thenReturn(Optional.of(localUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        OAuth2User result = customOAuth2UserService.processOAuth2User(request, mockOAuth2User);
+
+        assertNotNull(result);
+        assertEquals("localuser", result.getName());
+        assertEquals(AuthProvider.GOOGLE, localUser.getProvider());
+        assertEquals("google_98765", localUser.getProviderId());
+        assertEquals(Role.ADMIN, localUser.getRole()); // Garante que privilégios foram mantidos
+        verify(userRepository, times(1)).save(localUser);
+    }
 }
