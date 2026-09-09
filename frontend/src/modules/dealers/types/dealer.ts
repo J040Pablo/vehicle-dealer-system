@@ -7,6 +7,7 @@ export interface Dealer {
   neighborhood: string;
   city: string;
   state: string;
+  imageUrl?: string | null;
   totalVehicles: number;
   createdAt: string;
   updatedAt: string;
@@ -21,5 +22,6 @@ export interface DealerInput {
   neighborhood?: string;
   city?: string;
   state?: string;
+  imageUrl?: string | null;
 }
 

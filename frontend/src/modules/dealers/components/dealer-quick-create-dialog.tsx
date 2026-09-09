@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Check, AlertCircle, MapPin } from "lucide-react";
+import { Loader2, Check, AlertCircle, MapPin, Building2 } from "lucide-react";
 
 import {
   Dialog,
@@ -25,29 +25,24 @@ import { maskCep, maskCnpj } from "@/shared/utils/formatters";
 import { getFieldErrors } from "@/shared/api/error";
 import { useDebounce } from "@/shared/hooks/use-debounce";
 import { useCepLookup } from "@/shared/hooks/use-cep-lookup";
+import { ImageUrlField } from "@/shared/components/image-url-field";
 import {
   dealerFormDefaults,
   dealerSchema,
   type DealerFormValues,
 } from "@/modules/dealers/schemas/dealer-schema";
 import type { Dealer, DealerInput } from "@/modules/dealers/types/dealer";
-import { useCreateDealer, useUpdateDealer } from "@/modules/dealers/hooks/use-dealer-mutations";
+import { useCreateDealer } from "@/modules/dealers/hooks/use-dealer-mutations";
 
-import { Building2 } from "lucide-react";
-import { ImageUrlField } from "@/shared/components/image-url-field";
-
-interface DealerFormDialogProps {
+export interface DealerQuickCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  dealer?: Dealer | null;
-  onSuccess?: (dealer: Dealer) => void;
+  onSuccess?: (createdDealer: Dealer) => void;
 }
 
-export function DealerFormDialog({ open, onOpenChange, dealer, onSuccess }: DealerFormDialogProps) {
-  const isEditMode = !!dealer;
+export function DealerQuickCreateDialog({ open, onOpenChange, onSuccess }: DealerQuickCreateDialogProps) {
   const createDealer = useCreateDealer();
-  const updateDealer = useUpdateDealer();
-  const isPending = createDealer.isPending || updateDealer.isPending;
+  const isPending = createDealer.isPending;
 
   const form = useForm<DealerFormValues>({
     resolver: zodResolver(dealerSchema),
@@ -74,21 +69,8 @@ export function DealerFormDialog({ open, onOpenChange, dealer, onSuccess }: Deal
 
   useEffect(() => {
     if (!open) return;
-    form.reset(
-      dealer
-        ? {
-          name: dealer.name,
-          cnpj: dealer.cnpj,
-          cep: dealer.cep,
-          street: dealer.street || "",
-          neighborhood: dealer.neighborhood || "",
-          city: dealer.city || "",
-          state: dealer.state || "",
-          imageUrl: dealer.imageUrl || "",
-        }
-        : dealerFormDefaults
-    );
-  }, [open, dealer, form]);
+    form.reset(dealerFormDefaults);
+  }, [open, form]);
 
   useEffect(() => {
     if (isCepSuccess && cepData) {
@@ -112,11 +94,9 @@ export function DealerFormDialog({ open, onOpenChange, dealer, onSuccess }: Deal
   async function onSubmit(values: DealerFormValues) {
     const input: DealerInput = { ...values };
     try {
-      const resultDealer = isEditMode && dealer
-        ? await updateDealer.mutateAsync({ id: dealer.id, input })
-        : await createDealer.mutateAsync(input);
-      if (onSuccess && resultDealer) {
-        onSuccess(resultDealer);
+      const createdDealer = await createDealer.mutateAsync(input);
+      if (onSuccess && createdDealer) {
+        onSuccess(createdDealer);
       }
       onOpenChange(false);
     } catch (error) {
@@ -131,11 +111,12 @@ export function DealerFormDialog({ open, onOpenChange, dealer, onSuccess }: Deal
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? "Editar concessionária" : "Nova concessionária"}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-primary" />
+            Nova Concessionária
+          </DialogTitle>
           <DialogDescription>
-            {isEditMode
-              ? "Atualize os dados cadastrais da concessionária."
-              : "Preencha as informações abaixo para cadastrar uma nova concessionária."}
+            Cadastre rapidamente uma nova concessionária sem perder os dados preenchidos do veículo.
           </DialogDescription>
         </DialogHeader>
 
@@ -186,7 +167,6 @@ export function DealerFormDialog({ open, onOpenChange, dealer, onSuccess }: Deal
                           placeholder="00000-000"
                           {...field}
                           onChange={(e) => field.onChange(maskCep(e.target.value))}
-                          aria-describedby="cep-status"
                         />
                         {isSearchingCep && (
                           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -202,7 +182,7 @@ export function DealerFormDialog({ open, onOpenChange, dealer, onSuccess }: Deal
             </div>
 
             {/* CEP Feedback Status */}
-            <div id="cep-status" aria-live="polite" role="status">
+            <div id="quick-cep-status" aria-live="polite" role="status">
               {hasFullCep && isSearchingCep && (
                 <div className="flex items-center gap-1.5 text-xs text-primary font-medium py-1 px-2 rounded-md bg-primary/5">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -220,7 +200,7 @@ export function DealerFormDialog({ open, onOpenChange, dealer, onSuccess }: Deal
               {isViaCepUnavailable && (
                 <div className="flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400 font-normal py-1.5 px-2.5 rounded-md bg-amber-500/10 border border-amber-500/20">
                   <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <span>Não foi possível consultar o CEP agora. Você pode preencher o endereço manualmente.</span>
+                  <span>Não foi possível consultar o CEP agora. Preencha o endereço manualmente.</span>
                 </div>
               )}
             </div>
@@ -231,9 +211,6 @@ export function DealerFormDialog({ open, onOpenChange, dealer, onSuccess }: Deal
                 <MapPin className="h-4 w-4 text-primary" />
                 <span className="text-xs font-semibold text-foreground uppercase tracking-wide">Endereço</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Informe o CEP para preencher automaticamente o endereço. Caso necessário, você poderá editar os campos manualmente.
-              </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <FormField
@@ -337,7 +314,7 @@ export function DealerFormDialog({ open, onOpenChange, dealer, onSuccess }: Deal
                 Cancelar
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Salvando..." : "Salvar"}
+                {isPending ? "Salvando..." : "Salvar Concessionária"}
               </Button>
             </DialogFooter>
           </form>

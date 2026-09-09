@@ -30,7 +30,7 @@ public class Vehicle {
     @Column(name = "year", nullable = false)
     private Integer year;
 
-    @Column(name = "plate", nullable = false, unique = true, length = 10)
+    @Column(name = "plate", nullable = false, unique = true, length = 7)
     private String plate;
 
     @Column(name = "color", nullable = false, length = 50)
@@ -39,6 +39,9 @@ public class Vehicle {
     @Enumerated(EnumType.STRING)
     @Column(name = "fuel_type", nullable = false, length = 20)
     private FuelType fuelType;
+
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dealer_id")

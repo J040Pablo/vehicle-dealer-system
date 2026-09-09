@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { DealerTable } from "../dealer-table";
 import type { Dealer } from "@/modules/dealers/types/dealer";
 
@@ -14,6 +15,7 @@ const mockDealers: Dealer[] = [
     neighborhood: "Bairro A",
     city: "Salvador",
     state: "BA",
+    imageUrl: "https://example.com/logo.png",
     totalVehicles: 3,
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
@@ -27,6 +29,7 @@ const mockDealers: Dealer[] = [
     neighborhood: "Bairro B",
     city: "São Paulo",
     state: "SP",
+    imageUrl: null,
     totalVehicles: 1,
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
@@ -45,9 +48,12 @@ describe("DealerTable", () => {
   };
 
   it("should render skeleton when isLoading is true", () => {
-    const { container } = render(<DealerTable {...defaultProps} isLoading={true} />);
+    const { container } = render(
+      <MemoryRouter>
+        <DealerTable {...defaultProps} isLoading={true} />
+      </MemoryRouter>
+    );
     expect(screen.queryByText("Concessionária Alfa")).not.toBeInTheDocument();
-    // Skeleton elements should be present
     expect(container.querySelectorAll(".animate-pulse").length).toBeGreaterThan(0);
   });
 
@@ -55,7 +61,11 @@ describe("DealerTable", () => {
     const user = userEvent.setup();
     const onCreateMock = vi.fn();
 
-    render(<DealerTable {...defaultProps} dealers={[]} isFiltered={false} onCreate={onCreateMock} />);
+    render(
+      <MemoryRouter>
+        <DealerTable {...defaultProps} dealers={[]} isFiltered={false} onCreate={onCreateMock} />
+      </MemoryRouter>
+    );
 
     expect(screen.getByText("Nenhuma concessionária encontrada")).toBeInTheDocument();
     expect(screen.getByText("Cadastre sua primeira concessionária.")).toBeInTheDocument();
@@ -70,12 +80,14 @@ describe("DealerTable", () => {
     const onClearFilterMock = vi.fn();
 
     render(
-      <DealerTable
-        {...defaultProps}
-        dealers={[]}
-        isFiltered={true}
-        onClearFilter={onClearFilterMock}
-      />
+      <MemoryRouter>
+        <DealerTable
+          {...defaultProps}
+          dealers={[]}
+          isFiltered={true}
+          onClearFilter={onClearFilterMock}
+        />
+      </MemoryRouter>
     );
 
     expect(screen.getByText("Nenhuma concessionária encontrada")).toBeInTheDocument();
@@ -87,7 +99,11 @@ describe("DealerTable", () => {
   });
 
   it("should render dealers list with correct columns and data", () => {
-    render(<DealerTable {...defaultProps} />);
+    render(
+      <MemoryRouter>
+        <DealerTable {...defaultProps} />
+      </MemoryRouter>
+    );
 
     expect(screen.getByText("Concessionária Alfa")).toBeInTheDocument();
     expect(screen.getByText("11.444.777/0001-61")).toBeInTheDocument();
@@ -100,6 +116,31 @@ describe("DealerTable", () => {
     expect(screen.getByText("1 veículo")).toBeInTheDocument();
   });
 
+  it("should render dealer imageUrl thumbnail when provided", () => {
+    render(
+      <MemoryRouter>
+        <DealerTable {...defaultProps} />
+      </MemoryRouter>
+    );
+
+    const img = screen.getByAltText("Concessionária Alfa");
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute("src", "https://example.com/logo.png");
+  });
+
+  it("should handle image load error by falling back to icon", () => {
+    render(
+      <MemoryRouter>
+        <DealerTable {...defaultProps} />
+      </MemoryRouter>
+    );
+
+    const img = screen.getByAltText("Concessionária Alfa");
+    fireEvent.error(img);
+
+    expect(screen.queryByAltText("Concessionária Alfa")).not.toBeInTheDocument();
+  });
+
   it("should trigger view, edit and delete actions when buttons are clicked", async () => {
     const user = userEvent.setup();
     const onViewVehiclesMock = vi.fn();
@@ -107,12 +148,14 @@ describe("DealerTable", () => {
     const onDeleteMock = vi.fn();
 
     render(
-      <DealerTable
-        {...defaultProps}
-        onViewVehicles={onViewVehiclesMock}
-        onEdit={onEditMock}
-        onDelete={onDeleteMock}
-      />
+      <MemoryRouter>
+        <DealerTable
+          {...defaultProps}
+          onViewVehicles={onViewVehiclesMock}
+          onEdit={onEditMock}
+          onDelete={onDeleteMock}
+        />
+      </MemoryRouter>
     );
 
     const viewBtn = screen.getByRole("button", {

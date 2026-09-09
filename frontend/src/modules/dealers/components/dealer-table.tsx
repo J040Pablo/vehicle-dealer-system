@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Building2, Eye, Pencil, Trash2 } from "lucide-react";
 
 import {
@@ -23,7 +25,7 @@ interface DealerTableProps {
   isLoading: boolean;
   onEdit: (dealer: Dealer) => void;
   onDelete: (dealer: Dealer) => void;
-  onViewVehicles: (dealer: Dealer) => void;
+  onViewVehicles?: (dealer: Dealer) => void;
   onCreate: () => void;
   // Pagination props
   page?: number;
@@ -34,6 +36,30 @@ interface DealerTableProps {
   onSizeChange?: (newSize: number) => void;
   isFirst?: boolean;
   isLast?: boolean;
+}
+
+function DealerThumbnail({ imageUrl, name }: { imageUrl?: string | null; name: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!imageUrl || hasError) {
+    return (
+      <div className="h-10 w-10 shrink-0 rounded-md border border-border bg-muted/30 flex items-center justify-center text-muted-foreground/60 shadow-xs overflow-hidden">
+        <Building2 className="h-5 w-5 text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md border border-border bg-muted/30 flex items-center justify-center shadow-xs">
+      <img
+        src={imageUrl}
+        alt={name}
+        loading="lazy"
+        onError={() => setHasError(true)}
+        className="h-full w-full object-contain"
+      />
+    </div>
+  );
 }
 
 export function DealerTable({
@@ -99,26 +125,48 @@ export function DealerTable({
           <TableBody className="divide-y divide-border/60">
             {dealers.map((dealer) => (
               <TableRow key={dealer.id} className="transition-colors hover:bg-muted/40 group">
-                <TableCell className="font-semibold text-foreground">{dealer.name}</TableCell>
+                <TableCell className="font-semibold text-foreground py-2.5">
+                  <div className="flex items-center gap-3">
+                    <DealerThumbnail imageUrl={dealer.imageUrl} name={dealer.name} />
+                    <span>{dealer.name}</span>
+                  </div>
+                </TableCell>
                 <TableCell className="font-mono text-xs tracking-wider font-medium text-foreground/80">{dealer.cnpj}</TableCell>
                 <TableCell className="text-foreground/90">{dealer.city}</TableCell>
                 <TableCell className="text-muted-foreground font-medium">{dealer.state}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className="font-semibold px-2.5 py-0.5">
-                    {dealer.totalVehicles} {dealer.totalVehicles === 1 ? "veículo" : "veículos"}
-                  </Badge>
+                  <Link
+                    to={`/vehicles?dealerId=${dealer.id}`}
+                    onClick={() => onViewVehicles?.(dealer)}
+                    className="inline-flex"
+                  >
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="font-semibold px-2.5 py-0.5 h-7 cursor-pointer hover:bg-secondary/80"
+                      title={`Ver ${dealer.totalVehicles} veículos no catálogo`}
+                    >
+                      {dealer.totalVehicles} {dealer.totalVehicles === 1 ? "veículo" : "veículos"}
+                    </Button>
+                  </Link>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onViewVehicles(dealer)}
-                      aria-label={`Ver veículos vinculados da concessionária ${dealer.name}`}
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                    <Link
+                      to={`/vehicles?dealerId=${dealer.id}`}
+                      onClick={() => onViewVehicles?.(dealer)}
+                      className="inline-flex"
                     >
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Ver veículos vinculados da concessionária ${dealer.name}`}
+                        title="Ver veículos no catálogo"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </Link>
                     <Button
                       variant="ghost"
                       size="icon"

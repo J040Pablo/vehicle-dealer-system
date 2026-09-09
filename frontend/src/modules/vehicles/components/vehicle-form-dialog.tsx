@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Car, Plus } from "lucide-react";
 
 import {
   Dialog,
@@ -15,6 +16,7 @@ import { Input } from "@/shared/components/ui/input";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,6 +25,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { FUEL_TYPE_OPTIONS } from "@/shared/utils/formatters";
 import { getFieldErrors } from "@/shared/api/error";
+import { ImageUrlField } from "@/shared/components/image-url-field";
+import { DealerQuickCreateDialog } from "@/modules/dealers/components/dealer-quick-create-dialog";
 import {
   vehicleFormDefaults,
   vehicleSchema,
@@ -38,12 +42,23 @@ interface VehicleFormDialogProps {
   vehicle?: Vehicle | null;
 }
 
+function formatPlateInput(input: string): string {
+  if (!input) return "";
+  return input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toUpperCase()
+    .slice(0, 7);
+}
+
 export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDialogProps) {
   const isEditMode = !!vehicle;
   const { data: dealers } = useDealers();
   const createVehicle = useCreateVehicle();
   const updateVehicle = useUpdateVehicle();
   const isPending = createVehicle.isPending || updateVehicle.isPending;
+  const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
 
   const form = useForm<VehicleFormValues>({
     resolver: zodResolver(vehicleSchema),
@@ -61,6 +76,7 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
             plate: vehicle.plate,
             color: vehicle.color || "",
             fuelType: vehicle.fuelType,
+            imageUrl: vehicle.imageUrl || "",
             dealerId: vehicle.dealerId,
           }
         : vehicleFormDefaults
@@ -156,10 +172,14 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
                     <FormControl>
                       <Input
                         placeholder="ABC1D23"
+                        maxLength={7}
                         {...field}
-                        onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        onChange={(e) => field.onChange(formatPlateInput(e.target.value))}
                       />
                     </FormControl>
+                    <FormDescription className="text-[11px]">
+                      Formato tradicional (ABC1234) ou Mercosul (ABC1D23)
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -205,12 +225,40 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
               )}
             />
 
+            {/* Image URL field */}
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <ImageUrlField
+                  label="Foto do Veículo (Opcional)"
+                  placeholder="https://exemplo.com/carro.jpg"
+                  value={field.value}
+                  onChange={field.onChange}
+                  fallbackIcon={Car}
+                  error={form.formState.errors.imageUrl?.message}
+                />
+              )}
+            />
+
             <FormField
               control={form.control}
               name="dealerId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Concessionária</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Concessionária</FormLabel>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsQuickCreateOpen(true)}
+                      className="h-6 text-xs text-primary hover:text-primary/80 gap-1 px-1.5"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Nova Concessionária
+                    </Button>
+                  </div>
                   <Select
                     onValueChange={(value) => field.onChange(value === "none" ? null : Number(value))}
                     value={field.value !== null ? String(field.value) : "none"}
@@ -244,6 +292,14 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
             </DialogFooter>
           </form>
         </Form>
+
+        <DealerQuickCreateDialog
+          open={isQuickCreateOpen}
+          onOpenChange={setIsQuickCreateOpen}
+          onSuccess={(createdDealer) => {
+            form.setValue("dealerId", createdDealer.id, { shouldValidate: true, shouldDirty: true });
+          }}
+        />
       </DialogContent>
     </Dialog>
   );

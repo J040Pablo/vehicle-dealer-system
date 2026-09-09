@@ -148,6 +148,7 @@ describe("VehicleFormDialog", () => {
         plate: "XYZ9876",
         color: "Preto",
         fuelType: "FLEX",
+        imageUrl: undefined,
         dealerId: null,
       });
       expect(onOpenChangeMock).toHaveBeenCalledWith(false);
@@ -195,6 +196,7 @@ describe("VehicleFormDialog", () => {
           plate: "ABC1D23",
           color: "Prata",
           fuelType: "GASOLINA",
+          imageUrl: undefined,
           dealerId: 1,
         },
       });

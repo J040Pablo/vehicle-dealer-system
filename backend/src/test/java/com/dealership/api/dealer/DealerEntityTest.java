@@ -77,7 +77,8 @@ class DealerEntityTest {
         assertThat(noArgsDealer).isNotNull();
 
         Dealer allArgsDealer = new Dealer(1L, "Name", "12345678000195", "01001000",
-                "Street", "Neighborhood", "City", "SP", new ArrayList<>(), null, null);
+                "Street", "Neighborhood", "City", "SP", "https://example.com/logo.png", new ArrayList<>(), null, null);
         assertThat(allArgsDealer.getId()).isEqualTo(1L);
+        assertThat(allArgsDealer.getImageUrl()).isEqualTo("https://example.com/logo.png");
     }
 }
