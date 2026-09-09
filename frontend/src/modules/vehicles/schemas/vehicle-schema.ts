@@ -21,6 +21,11 @@ export const vehicleSchema = z.object({
   fuelType: z.enum(["GASOLINA", "ETANOL", "FLEX", "DIESEL", "ELETRICO", "HIBRIDO"], {
     errorMap: () => ({ message: "Selecione o tipo de combustível." }),
   }),
+  chassis: z.string().trim().max(100, "O chassi deve ter no máximo 100 caracteres.").optional().nullable(),
+  value: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number({ invalid_type_error: "Informe um valor numérico válido." }).min(0, "O valor não pode ser negativo.").optional().nullable()
+  ),
   imageUrl: z.preprocess(
     (value) => {
       if (typeof value !== "string") return value;
@@ -45,6 +50,8 @@ export const vehicleFormDefaults: VehicleFormValues = {
   plate: "",
   color: "",
   fuelType: "FLEX",
+  chassis: "",
+  value: undefined,
   imageUrl: "",
   dealerId: null,
 };

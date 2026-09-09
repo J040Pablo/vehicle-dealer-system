@@ -4,8 +4,11 @@ import com.dealership.api.dealer.Dealer;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -37,8 +40,15 @@ public class Vehicle {
     private String color;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "fuel_type", nullable = false, length = 20)
     private FuelType fuelType;
+
+    @Column(name = "chassis", length = 100)
+    private String chassis;
+
+    @Column(name = "value", precision = 15, scale = 2)
+    private BigDecimal value;
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;

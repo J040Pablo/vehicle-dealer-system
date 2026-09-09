@@ -119,8 +119,9 @@ export function VehicleTable({
               <TableHead className="w-[150px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Modelo</TableHead>
               <TableHead className="w-[90px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ano</TableHead>
               <TableHead className="w-[120px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Placa</TableHead>
-              <TableHead className="w-[110px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cor</TableHead>
-              <TableHead className="w-[130px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Combustível</TableHead>
+              <TableHead className="w-[100px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cor</TableHead>
+              <TableHead className="w-[120px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Combustível</TableHead>
+              <TableHead className="w-[120px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Valor (R$)</TableHead>
               <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Concessionária</TableHead>
               <TableHead className="text-right w-[100px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ações</TableHead>
             </TableRow>
@@ -138,6 +139,11 @@ export function VehicleTable({
                 <TableCell className="text-xs text-foreground/90 font-medium">{vehicle.color || "-"}</TableCell>
                 <TableCell>
                   <FuelBadge fuelType={vehicle.fuelType} />
+                </TableCell>
+                <TableCell className="text-xs font-mono text-foreground/90 font-semibold">
+                  {vehicle.value != null
+                    ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(vehicle.value)
+                    : "-"}
                 </TableCell>
                 <TableCell>
                   {vehicle.dealerName && vehicle.dealerId ? (

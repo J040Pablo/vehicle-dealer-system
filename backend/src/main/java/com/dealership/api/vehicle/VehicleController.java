@@ -59,6 +59,22 @@ public class VehicleController {
         return ResponseEntity.ok(updated);
     }
 
+    @PostMapping(value = "/{id}/image", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Realizar upload de foto do veículo para o AWS S3")
+    public ResponseEntity<VehicleResponseDTO> uploadImage(
+            @PathVariable Long id,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        VehicleResponseDTO updated = vehicleService.uploadImage(id, file);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}/image")
+    @Operation(summary = "Remover imagem do veículo no AWS S3")
+    public ResponseEntity<VehicleResponseDTO> deleteImage(@PathVariable Long id) {
+        VehicleResponseDTO updated = vehicleService.deleteImage(id);
+        return ResponseEntity.ok(updated);
+    }
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Excluir veículo por ID")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

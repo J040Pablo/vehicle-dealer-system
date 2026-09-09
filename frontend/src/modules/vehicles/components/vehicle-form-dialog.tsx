@@ -76,6 +76,8 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
             plate: vehicle.plate,
             color: vehicle.color || "",
             fuelType: vehicle.fuelType,
+            chassis: vehicle.chassis || "",
+            value: vehicle.value ?? undefined,
             imageUrl: vehicle.imageUrl || "",
             dealerId: vehicle.dealerId,
           }
@@ -186,44 +188,82 @@ export function VehicleFormDialog({ open, onOpenChange, vehicle }: VehicleFormDi
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cor</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Preto, Prata, Branco..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="fuelType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Combustível</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cor</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o combustível" />
-                      </SelectTrigger>
+                      <Input placeholder="Preto, Prata, Branco..." {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {FUEL_TYPE_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="chassis"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Chassi (Opcional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="9BWZZZ377VT004251" {...field} value={field.value || ""} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="value"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valor (R$ - Opcional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="85000.00"
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="fuelType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Combustível</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o combustível" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {FUEL_TYPE_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* Image URL field */}
             <FormField

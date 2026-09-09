@@ -32,6 +32,7 @@ public class VehicleService {
     private final VehicleMapper vehicleMapper;
     private final DealerService dealerService;
     private final ApplicationEventPublisher eventPublisher;
+    private final com.dealership.api.config.S3StorageService s3StorageService;
 
     @Transactional(readOnly = true)
     @Cacheable(
@@ -121,7 +122,7 @@ public class VehicleService {
         }
 
         VehicleRequestDTO normalizedDto = new VehicleRequestDTO(
-                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), normalizedImageUrl, dto.dealerId()
+                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), dto.chassis(), dto.value(), normalizedImageUrl, dto.dealerId()
         );
 
         Vehicle vehicle = vehicleMapper.toEntity(normalizedDto);
@@ -164,7 +165,7 @@ public class VehicleService {
         }
 
         VehicleRequestDTO normalizedDto = new VehicleRequestDTO(
-                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), normalizedImageUrl, dto.dealerId()
+                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), dto.chassis(), dto.value(), normalizedImageUrl, dto.dealerId()
         );
 
         vehicleMapper.updateEntityFromDTO(normalizedDto, vehicle);
@@ -235,10 +236,55 @@ public class VehicleService {
             @CacheEvict(value = "filters", allEntries = true),
             @CacheEvict(value = "dashboard", allEntries = true)
     })
+    public VehicleResponseDTO uploadImage(Long id, org.springframework.web.multipart.MultipartFile file) {
+        log.info("Upload de imagem para veículo ID={}", id);
+        Vehicle vehicle = getVehicleEntity(id);
+        if (vehicle.getImageUrl() != null) {
+            s3StorageService.deleteVehicleImage(vehicle.getImageUrl());
+        }
+        try {
+            String imageUrl = s3StorageService.uploadVehicleImage(id, file);
+            vehicle.setImageUrl(imageUrl);
+            Vehicle updated = vehicleRepository.save(vehicle);
+            eventPublisher.publishEvent(new AuditEvent("VEHICLE", id, "IMAGE_UPLOAD", "Uploaded image: " + imageUrl));
+            return vehicleMapper.toDTO(updated);
+        } catch (java.io.IOException e) {
+            throw new BusinessException("Erro ao realizar upload da imagem para o S3: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "vehicles", key = "'vehicle:' + #id"),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
+    public VehicleResponseDTO deleteImage(Long id) {
+        log.info("Removendo imagem do veículo ID={}", id);
+        Vehicle vehicle = getVehicleEntity(id);
+        if (vehicle.getImageUrl() != null) {
+            s3StorageService.deleteVehicleImage(vehicle.getImageUrl());
+            vehicle.setImageUrl(null);
+            Vehicle updated = vehicleRepository.save(vehicle);
+            eventPublisher.publishEvent(new AuditEvent("VEHICLE", id, "IMAGE_DELETE", "Deleted vehicle image"));
+            return vehicleMapper.toDTO(updated);
+        }
+        return vehicleMapper.toDTO(vehicle);
+    }
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "vehicles", key = "'vehicle:' + #id"),
+            @CacheEvict(value = "filters", allEntries = true),
+            @CacheEvict(value = "dashboard", allEntries = true)
+    })
     public void delete(Long id) {
         log.info("Excluindo veículo: ID={}", id);
 
         Vehicle vehicle = getVehicleEntity(id);
+        if (vehicle.getImageUrl() != null) {
+            s3StorageService.deleteVehicleImage(vehicle.getImageUrl());
+        }
         vehicleRepository.delete(vehicle);
 
         log.info("Evento de negócio: operation=VEHICLE_DELETED entityId={}", id);

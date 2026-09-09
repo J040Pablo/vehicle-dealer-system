@@ -53,7 +53,13 @@ management:
   endpoint:
     health:
       show-details: "always"
+      probes:
+        enabled: true
   health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
     redis:
       enabled: false
   metrics:
@@ -102,4 +108,15 @@ springdoc:
 jwt:
   secret: ${JWT_SECRET:}
   expiration: ${JWT_EXPIRATION:86400000}
+
+aws:
+  region: ${AWS_REGION:us-east-1}
+  dynamodb:
+    enabled: ${AWS_DYNAMODB_ENABLED:true}
+    endpoint: ${AWS_DYNAMODB_ENDPOINT:}
+    audit-table: ${AWS_DYNAMODB_AUDIT_TABLE:VehicleDealerAuditLogs}
+  s3:
+    endpoint: ${AWS_S3_ENDPOINT:}
+    bucket-name: ${AWS_S3_BUCKET_NAME:vehicle-dealer-images}
+    public-url-prefix: ${AWS_S3_PUBLIC_URL_PREFIX:}
 
