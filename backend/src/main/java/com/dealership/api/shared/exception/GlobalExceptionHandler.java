@@ -49,10 +49,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
     }
 
-    @ExceptionHandler({DuplicatePlateException.class, DuplicateCnpjException.class})
-    public ResponseEntity<ProblemDetail> handleConflictException(RuntimeException ex, HttpServletRequest request) {
+    @ExceptionHandler({DuplicatePlateException.class, DuplicateCnpjException.class, org.springframework.dao.DataIntegrityViolationException.class})
+    public ResponseEntity<ProblemDetail> handleConflictException(Exception ex, HttpServletRequest request) {
         log.warn("Conflito de dados: {}", ex.getMessage());
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        String detailMessage = (ex instanceof org.springframework.dao.DataIntegrityViolationException)
+                ? "Conflito de integridade de dados: registro duplicado ou restrição violada."
+                : ex.getMessage();
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, detailMessage);
         problemDetail.setType(URI.create("https://api.dealership.com/errors/conflict"));
         problemDetail.setTitle("Conflito de Dados");
         problemDetail.setInstance(URI.create(request.getRequestURI()));

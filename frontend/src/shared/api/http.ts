@@ -17,11 +17,12 @@ http.interceptors.request.use((config) => {
     config.headers["X-Correlation-Id"] = crypto.randomUUID();
   }
 
-  const isAuthEndpoint =
-    config.url?.startsWith("/auth/") || config.url?.startsWith("/api/auth/");
+  const isPublicAuthEndpoint =
+    (config.url?.startsWith("/auth/") || config.url?.startsWith("/api/auth/")) &&
+    !config.url?.includes("/auth/oauth2/link");
 
   const token = localStorage.getItem("token");
-  if (token && !isAuthEndpoint) {
+  if (token && !isPublicAuthEndpoint) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
 

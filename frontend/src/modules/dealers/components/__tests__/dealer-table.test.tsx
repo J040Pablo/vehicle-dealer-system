@@ -159,7 +159,7 @@ describe("DealerTable", () => {
     );
 
     const viewBtn = screen.getByRole("button", {
-      name: "Ver veículos vinculados da concessionária Concessionária Alfa",
+      name: "Ver 3 veículos da concessionária Concessionária Alfa",
     });
     const editBtn = screen.getByRole("button", {
       name: "Editar concessionária Concessionária Alfa",
