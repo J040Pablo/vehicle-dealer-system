@@ -1,15 +1,15 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${RDS_HOSTNAME:localhost}:5432/${RDS_DB_NAME:dealership_db}?sslmode=require}
+    url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
 
 aws:
   dynamodb:
     enabled: true
-    audit-table: ${AWS_DYNAMODB_AUDIT_TABLE:VehicleDealerAuditLogs}
+    audit-table: ${AWS_DYNAMODB_AUDIT_TABLE}
   s3:
-    bucket-name: ${AWS_S3_BUCKET_NAME:vehicle-dealer-images-prod}
+    bucket-name: ${AWS_S3_BUCKET_NAME}
 
 logging:
   level:
