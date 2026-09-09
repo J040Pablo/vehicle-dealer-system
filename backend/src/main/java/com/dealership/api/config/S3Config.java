@@ -35,4 +35,18 @@ public class S3Config {
 
         return builder.build();
     }
+
+    @Bean
+    public software.amazon.awssdk.services.s3.presigner.S3Presigner s3Presigner() {
+        log.info("Inicializando AWS S3Presigner para a região: {}", awsRegion);
+        software.amazon.awssdk.services.s3.presigner.S3Presigner.Builder builder = software.amazon.awssdk.services.s3.presigner.S3Presigner.builder()
+                .region(Region.of(awsRegion))
+                .credentialsProvider(DefaultCredentialsProvider.create());
+
+        if (s3Endpoint != null && !s3Endpoint.trim().isEmpty()) {
+            builder.endpointOverride(URI.create(s3Endpoint));
+        }
+
+        return builder.build();
+    }
 }

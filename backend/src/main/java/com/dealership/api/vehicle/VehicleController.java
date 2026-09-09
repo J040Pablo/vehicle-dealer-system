@@ -68,6 +68,15 @@ public class VehicleController {
         return ResponseEntity.ok(updated);
     }
 
+    @PostMapping("/{id}/image/presigned-url")
+    @Operation(summary = "Gerar Presigned URL para upload direto de foto no AWS S3")
+    public ResponseEntity<com.dealership.api.config.PresignedUrlDTO> generatePresignedUrl(
+            @PathVariable Long id,
+            @RequestParam(value = "filename", defaultValue = "image.jpg") String filename) {
+        com.dealership.api.config.PresignedUrlDTO dto = vehicleService.generatePresignedUrl(id, filename);
+        return ResponseEntity.ok(dto);
+    }
+
     @DeleteMapping("/{id}/image")
     @Operation(summary = "Remover imagem do veículo no AWS S3")
     public ResponseEntity<VehicleResponseDTO> deleteImage(@PathVariable Long id) {

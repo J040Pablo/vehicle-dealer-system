@@ -1,8 +1,8 @@
 package com.dealership.api.shared.audit;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
@@ -20,22 +20,26 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class DynamoDbAuditService {
 
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
+    private final String auditTableName;
+    private final boolean dynamoDbEnabled;
 
-    @Value("${aws.dynamodb.audit-table:VehicleDealerAuditLogs}")
-    private String auditTableName;
-
-    @Value("${aws.dynamodb.enabled:true}")
-    private boolean dynamoDbEnabled;
+    public DynamoDbAuditService(
+            ObjectProvider<DynamoDbEnhancedClient> dynamoDbEnhancedClientProvider,
+            @Value("${aws.dynamodb.audit-table:VehicleDealerAuditLogs}") String auditTableName,
+            @Value("${aws.dynamodb.enabled:true}") boolean dynamoDbEnabled) {
+        this.dynamoDbEnhancedClient = dynamoDbEnhancedClientProvider.getIfAvailable();
+        this.auditTableName = auditTableName;
+        this.dynamoDbEnabled = dynamoDbEnabled;
+    }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDynamoDbAuditEvent(AuditEvent event) {
-        if (!dynamoDbEnabled) {
-            log.debug("Auditoria DynamoDB desativada via propriedade aws.dynamodb.enabled.");
+        if (!dynamoDbEnabled || dynamoDbEnhancedClient == null) {
+            log.debug("Auditoria DynamoDB desativada ou cliente indisponível via propriedade aws.dynamodb.enabled.");
             return;
         }
 
