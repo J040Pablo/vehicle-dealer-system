@@ -44,7 +44,7 @@ spring:
               - email
               - profile
               - openid
-            redirect-uri: "${OAUTH2_GOOGLE_REDIRECT_URI:{baseUrl}/login/oauth2/code/{registrationId}}"
+            redirect-uri: "${OAUTH2_GOOGLE_REDIRECT_URI:https://vehicle-dealer-system.vercel.app/api/login/oauth2/code/google}"
 
 management:
   endpoints:
