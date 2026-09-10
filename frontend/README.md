@@ -10,7 +10,6 @@
 [![Zod](https://img.shields.io/badge/Zod-3-3E67B1?style=flat-square&logo=zod&logoColor=white)](https://zod.dev/)
 [![Axios](https://img.shields.io/badge/Axios-1.7-5A29E4?style=flat-square&logo=axios&logoColor=white)](https://axios-http.com/)
 [![Vitest](https://img.shields.io/badge/Vitest-2.1-6E9F18?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev/)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat-square&logo=vercel&logoColor=white)](https://vercel.com/)
 
 
 Interface web responsiva para a gestão de veículos e concessionárias, construída com React 18, TypeScript, Vite, TanStack Query e Tailwind CSS.
