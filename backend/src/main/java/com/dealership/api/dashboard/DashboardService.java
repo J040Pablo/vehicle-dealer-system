@@ -23,7 +23,7 @@ public class DashboardService {
     private final DealerRepository dealerRepository;
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "dashboard", key = "'metrics'", sync = true)
+    @Cacheable(value = "dashboard", key = "'metrics'")
     public DashboardMetricsDTO getDashboardMetrics() {
         log.info("Calculando métricas do dashboard no banco de dados (Cache Miss)");
 

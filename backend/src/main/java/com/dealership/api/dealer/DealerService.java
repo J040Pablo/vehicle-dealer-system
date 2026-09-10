@@ -37,7 +37,7 @@ public class DealerService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "dealers", key = "'dealers:page:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()", sync = true)
+    @Cacheable(value = "dealers", key = "'dealers:page:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()")
     public PagedResponseDTO<DealerResponseDTO> findAll(Pageable pageable) {
         Page<DealerResponseDTO> pageResult = dealerRepository.findAll(pageable)
                 .map(dealerMapper::toDTO);
@@ -45,7 +45,7 @@ public class DealerService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "dealers", key = "'dealers:all'", sync = true)
+    @Cacheable(value = "dealers", key = "'dealers:all'")
     public List<DealerResponseDTO> findAll() {
         return dealerRepository.findAll().stream()
                 .map(dealerMapper::toDTO)
@@ -53,7 +53,7 @@ public class DealerService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "dealers", key = "'dealer:' + #id", sync = true)
+    @Cacheable(value = "dealers", key = "'dealer:' + #id")
     public DealerResponseDTO findById(Long id) {
         Dealer dealer = getDealerEntity(id);
         return dealerMapper.toDTO(dealer);

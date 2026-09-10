@@ -24,8 +24,7 @@ public class ViaCepService {
 
     @Cacheable(
             value = "viacep",
-            key = "T(com.dealership.api.shared.util.CepUtils).normalize(#rawCep)",
-            sync = true
+            key = "T(com.dealership.api.shared.util.CepUtils).normalize(#rawCep)"
     )
     public ViaCepResponseDTO fetchAddress(String rawCep) {
         if (rawCep == null || rawCep.isBlank()) {

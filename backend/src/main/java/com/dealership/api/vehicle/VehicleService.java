@@ -37,8 +37,7 @@ public class VehicleService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = "filters",
-            key = "'vehicles:' + (#dealerId != null ? #dealerId : 'all') + ':' + (#search != null && !#search.isBlank() ? #search.trim() : 'none') + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
-            sync = true
+            key = "'vehicles:' + (#dealerId != null ? #dealerId : 'all') + ':' + (#search != null && !#search.isBlank() ? #search.trim() : 'none') + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()"
     )
     public PagedResponseDTO<VehicleResponseDTO> findAll(Long dealerId, String search, Pageable pageable) {
         log.info("Buscando veículos com filtro: dealerId={}, search={}", dealerId, search);
@@ -66,7 +65,7 @@ public class VehicleService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "vehicles", key = "'vehicle:' + #id", sync = true)
+    @Cacheable(value = "vehicles", key = "'vehicle:' + #id")
     public VehicleResponseDTO findById(Long id) {
         Vehicle vehicle = getVehicleEntity(id);
         return vehicleMapper.toDTO(vehicle);
