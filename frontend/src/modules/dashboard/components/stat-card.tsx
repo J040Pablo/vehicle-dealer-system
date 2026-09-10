@@ -7,31 +7,66 @@ import { cn } from "@/shared/lib/utils";
 
 interface StatCardProps {
   label: string;
-  value: number;
+  value: number | string;
   icon: LucideIcon;
   isLoading?: boolean;
   accentClassName?: string;
   tooltipText?: string;
+  subtext?: string;
+  trend?: {
+    value: string;
+    isPositive?: boolean;
+  };
 }
 
-export function StatCard({ label, value, icon: Icon, isLoading, accentClassName, tooltipText }: StatCardProps) {
+export function StatCard({
+  label,
+  value,
+  icon: Icon,
+  isLoading,
+  accentClassName,
+  tooltipText,
+  subtext,
+  trend,
+}: StatCardProps) {
   const content = (
-    <Card className="transition-all duration-200 hover:border-foreground/20 border-border bg-card shadow-none">
-      <CardContent className="flex items-center gap-4 p-5">
-        <div
-          className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground border border-border/60",
-            accentClassName
-          )}
-        >
-          <Icon className="h-5 w-5" />
+    <Card className="transition-all duration-200 hover:border-foreground/20 border-border/60 bg-card/60 backdrop-blur-sm shadow-none">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+          <div
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted/50 text-foreground border border-border/40",
+              accentClassName
+            )}
+          >
+            <Icon className="h-4 w-4" />
+          </div>
         </div>
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+
+        <div className="mt-3 space-y-1">
           {isLoading ? (
-            <Skeleton className="h-7 w-16" />
+            <Skeleton className="h-7 w-24" />
           ) : (
-            <p className="text-2xl font-bold tabular-nums text-foreground tracking-tight">{value}</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-bold tabular-nums tracking-tight text-foreground">{value}</p>
+              {trend && (
+                <span
+                  className={cn(
+                    "inline-flex items-center text-xs font-semibold px-1.5 py-0.5 rounded",
+                    trend.isPositive
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      : "bg-muted text-muted-foreground"
+                  )}
+                >
+                  {trend.value}
+                </span>
+              )}
+            </div>
+          )}
+
+          {subtext && !isLoading && (
+            <p className="text-xs text-muted-foreground font-medium pt-0.5">{subtext}</p>
           )}
         </div>
       </CardContent>

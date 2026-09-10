@@ -14,6 +14,8 @@ vi.mock("@/modules/dealers/hooks/use-dealers", () => ({
   useDealers: () => mockUseDealers(),
 }));
 
+import { MemoryRouter } from "react-router-dom";
+
 function renderComponent() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -21,7 +23,9 @@ function renderComponent() {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <DashboardPage />
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
     </QueryClientProvider>
   );
 }
