@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
@@ -13,12 +15,16 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        String[] origins = corsProperties.getAllowedOrigins().toArray(new String[0]);
+        List<String> origins = corsProperties.getAllowedOrigins();
+        String[] originPatterns = (origins != null && !origins.isEmpty())
+                ? origins.toArray(new String[0])
+                : new String[]{"*"};
 
         registry.addMapping("/**")
-                .allowedOrigins(origins)
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedOriginPatterns(originPatterns)
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
-                .exposedHeaders("X-Correlation-Id");
+                .exposedHeaders("X-Correlation-Id", "Authorization")
+                .allowCredentials(true);
     }
 }

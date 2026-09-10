@@ -44,6 +44,22 @@ describe("API error utils", () => {
       );
     });
 
+    it("should return friendly message for 403 status code", () => {
+      const axiosError = createMockAxiosError(undefined, undefined, "Forbidden");
+      axiosError.response = {
+        data: "<!DOCTYPE html><html><body>403 Forbidden</body></html>",
+        status: 403,
+        statusText: "Forbidden",
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      } as AxiosResponse;
+
+      expect(getErrorMessage(axiosError)).toBe(
+        "Acesso negado (403). Verifique a proteção de deployment da Vercel ou permissões da API."
+      );
+      expect(getFieldErrors(axiosError)).toEqual({});
+    });
+
     it("should return Axios error message if no ProblemDetail detail is available", () => {
       const axiosError = createMockAxiosError(undefined, undefined, "Server Error 500");
 

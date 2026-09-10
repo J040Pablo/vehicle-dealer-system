@@ -22,15 +22,16 @@ class WebConfigTest {
         CorsRegistration registration = mock(CorsRegistration.class);
 
         when(registry.addMapping("/**")).thenReturn(registration);
-        when(registration.allowedOrigins("http://localhost:3000", "http://localhost:5173")).thenReturn(registration);
-        when(registration.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")).thenReturn(registration);
+        when(registration.allowedOriginPatterns("http://localhost:3000", "http://localhost:5173")).thenReturn(registration);
+        when(registration.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")).thenReturn(registration);
         when(registration.allowedHeaders("*")).thenReturn(registration);
-        when(registration.exposedHeaders("X-Correlation-Id")).thenReturn(registration);
+        when(registration.exposedHeaders("X-Correlation-Id", "Authorization")).thenReturn(registration);
+        when(registration.allowCredentials(true)).thenReturn(registration);
 
         webConfig.addCorsMappings(registry);
 
         verify(registry, times(1)).addMapping("/**");
-        verify(registration, times(1)).allowedOrigins("http://localhost:3000", "http://localhost:5173");
-        verify(registration, times(1)).exposedHeaders("X-Correlation-Id");
+        verify(registration, times(1)).allowedOriginPatterns("http://localhost:3000", "http://localhost:5173");
+        verify(registration, times(1)).exposedHeaders("X-Correlation-Id", "Authorization");
     }
 }

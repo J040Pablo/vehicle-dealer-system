@@ -3,7 +3,10 @@ import type { ProblemDetail } from "@/shared/types/api";
 
 function getProblem(error: unknown): ProblemDetail | undefined {
   if (error instanceof AxiosError) {
-    return error.response?.data as ProblemDetail | undefined;
+    const data = error.response?.data;
+    if (data && typeof data === "object" && !Array.isArray(data)) {
+      return data as ProblemDetail;
+    }
   }
   return undefined;
 }
@@ -15,6 +18,9 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof AxiosError) {
     if (error.code === "ERR_NETWORK") {
       return "Não foi possível conectar à API. Verifique se o backend está em execução.";
+    }
+    if (error.response?.status === 403) {
+      return "Acesso negado (403). Verifique a proteção de deployment da Vercel ou permissões da API.";
     }
     return error.message;
   }
