@@ -1,6 +1,16 @@
 # Backend - Vehicle Dealer API
 
 [![Backend CI](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/backend-ci.yml)
+[![Java 21](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.3-6DB33F?style=flat-square&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Security](https://img.shields.io/badge/Spring_Security-6-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Flyway](https://img.shields.io/badge/Flyway-V1..V8-CC0200?style=flat-square&logo=flyway&logoColor=white)](https://flywaydb.org/)
+[![AWS S3](https://img.shields.io/badge/AWS-S3-569A31?style=flat-square&logo=amazons3&logoColor=white)](https://aws.amazon.com/s3/)
+[![AWS DynamoDB](https://img.shields.io/badge/AWS-DynamoDB-4053D6?style=flat-square&logo=amazondynamodb&logoColor=white)](https://aws.amazon.com/dynamodb/)
+[![Swagger](https://img.shields.io/badge/OpenAPI-3.0-85EA2D?style=flat-square&logo=swagger&logoColor=black)](http://localhost:8080/api/swagger-ui.html)
+[![JWT](https://img.shields.io/badge/JWT-Stateless-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
+
 
 API RESTful corporativa para gestão de concessionárias e catálogo de veículos, desenvolvida em Java 21 com Spring Boot 3, arquitetura em camadas, persistência relacional e suporte a serviços de nuvem da AWS.
 
