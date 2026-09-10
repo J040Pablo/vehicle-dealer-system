@@ -16,6 +16,7 @@ import { Logo } from "@/shared/components/logo";
 import { loginSchema, registerSchema, type LoginCredentials, type RegisterCredentials } from "../types/auth";
 import { useLogin, useRegister } from "../hooks/use-auth";
 import { getErrorMessage } from "@/shared/api/error";
+import { sanitizeApiUrl } from "@/shared/api/http";
 
 type AuthMode = "login" | "register";
 
@@ -267,8 +268,7 @@ export function LoginPage() {
                     variant="outline"
                     className="w-full h-10 font-semibold shadow-sm text-sm border-border hover:bg-accent hover:text-accent-foreground"
                     onClick={() => {
-                      const backendUrl = import.meta.env.VITE_API_URL || "/api";
-                      const apiBase = backendUrl.endsWith("/api") ? backendUrl : `${backendUrl.replace(/\/$/, "")}/api`;
+                      const apiBase = sanitizeApiUrl(import.meta.env.VITE_API_URL);
                       window.location.href = `${apiBase}/oauth2/authorization/google`;
                     }}
                   >
@@ -431,8 +431,7 @@ export function LoginPage() {
                     variant="outline"
                     className="w-full h-10 font-semibold shadow-sm text-sm border-border hover:bg-accent hover:text-accent-foreground"
                     onClick={() => {
-                      const backendUrl = import.meta.env.VITE_API_URL || "/api";
-                      const apiBase = backendUrl.endsWith("/api") ? backendUrl : `${backendUrl.replace(/\/$/, "")}/api`;
+                      const apiBase = sanitizeApiUrl(import.meta.env.VITE_API_URL);
                       window.location.href = `${apiBase}/oauth2/authorization/google`;
                     }}
                   >

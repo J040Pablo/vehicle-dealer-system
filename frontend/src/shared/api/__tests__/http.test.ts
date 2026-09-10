@@ -1,10 +1,17 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { http } from "../http";
+import { http, sanitizeApiUrl } from "../http";
 
 describe("http Axios instance interceptors", () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
+  });
+
+  it("should sanitize malformed trailing characters from API URL", () => {
+    expect(sanitizeApiUrl(undefined)).toBe("/api");
+    expect(sanitizeApiUrl("http://54.226.237.94:8080/api}$")).toBe("http://54.226.237.94:8080/api");
+    expect(sanitizeApiUrl("http://54.226.237.94:8080/api}")).toBe("http://54.226.237.94:8080/api");
+    expect(sanitizeApiUrl("http://54.226.237.94:8080")).toBe("http://54.226.237.94:8080/api");
   });
 
   it("should inject X-Correlation-Id header if not provided", async () => {

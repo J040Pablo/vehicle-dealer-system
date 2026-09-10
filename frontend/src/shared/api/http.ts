@@ -5,10 +5,15 @@ import axios from "axios";
  * Base URL and the X-Correlation-Id header preserve the existing backend integration
  * (Vite proxies /api to the Spring Boot service — see vite.config.ts).
  */
+export const sanitizeApiUrl = (url?: string): string => {
+  if (!url) return "/api";
+  const cleaned = url.trim().replace(/[\}\$\s"']+$/, "");
+  if (!cleaned) return "/api";
+  return cleaned.endsWith("/api") ? cleaned : `${cleaned.replace(/\/$/, "")}/api`;
+};
+
 const getBaseUrl = (): string => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (!envUrl) return "/api";
-  return envUrl.endsWith("/api") ? envUrl : `${envUrl.replace(/\/$/, "")}/api`;
+  return sanitizeApiUrl(import.meta.env.VITE_API_URL);
 };
 
 export const http = axios.create({
