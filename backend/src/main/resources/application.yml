@@ -44,7 +44,11 @@ spring:
               - email
               - profile
               - openid
-            redirect-uri: "${OAUTH2_GOOGLE_REDIRECT_URI:http://localhost:3000/api/login/oauth2/code/google}"
+            redirect-uri: "${OAUTH2_GOOGLE_REDIRECT_URI:{baseUrl}/login/oauth2/code/{registrationId}}"
+
+app:
+  oauth2:
+    authorized-redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/redirect}
 
 management:
   endpoints:
