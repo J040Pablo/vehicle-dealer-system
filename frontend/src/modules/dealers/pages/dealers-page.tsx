@@ -34,7 +34,12 @@ export function DealersPage() {
   const [searchTerm, setSearchTerm] = useState(searchParamValue);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  const { data: pageData, isLoading, isError, error } = useDealersPaginated(page, size);
+  // Reset to first page whenever search term changes
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch]);
+
+  const { data: pageData, isLoading, isError, error } = useDealersPaginated(page, size, debouncedSearch);
 
   const dealers = pageData?.content;
   const totalPages = pageData?.totalPages ?? 1;
@@ -98,20 +103,10 @@ export function DealersPage() {
     setSearchParams(currentParams);
   }
 
-  // Client-side filtering by name, CNPJ, city/state or vehicle association status
+  // Client-side filtering by vehicle association status on the returned page
   const filteredDealers = useMemo(() => {
     if (!dealers) return [];
     let result = dealers;
-
-    const query = debouncedSearch.toLowerCase().trim();
-    if (query) {
-      result = result.filter(
-        (d) =>
-          d.name.toLowerCase().includes(query) ||
-          d.cnpj.toLowerCase().includes(query) ||
-          d.city.toLowerCase().includes(query)
-      );
-    }
 
     if (vehicleFilterParam === "WITH_VEHICLES") {
       result = result.filter((d) => (d.totalVehicles ?? 0) > 0);
@@ -120,7 +115,7 @@ export function DealersPage() {
     }
 
     return result;
-  }, [dealers, debouncedSearch, vehicleFilterParam]);
+  }, [dealers, vehicleFilterParam]);
 
   const isFiltered = searchParamValue.trim().length > 0 || vehicleFilterParam !== "ALL";
 

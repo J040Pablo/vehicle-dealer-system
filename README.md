@@ -2,17 +2,41 @@
 
 [![Backend CI](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/backend-ci.yml)
 [![Frontend CI](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/frontend-ci.yml)
-[![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat-square&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.3-6DB33F?style=flat-square&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![AWS](https://img.shields.io/badge/AWS-S3%20%7C%20DynamoDB%20%7C%20ECS-232F3E?style=flat-square&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
-[![Docker](https://img.shields.io/badge/Docker-20.10+-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
-
 
 Sistema corporativo para gestão de concessionárias e catálogo de veículos, desenvolvido com arquitetura descentralizada Full Stack.
+
+---
+
+## 🌐 Demonstração & URLs de Produção (AWS + Vercel)
+
+A aplicação está totalmente implantada e operacional em ambiente de produção:
+
+| Recurso | Plataforma | URL de Acesso |
+| :--- | :--- | :--- |
+| 🚀 **Aplicação Web (Frontend SPA)** | Vercel | [https://vehicle-dealer-system.vercel.app](https://vehicle-dealer-system.vercel.app) |
+| ⚙️ **API Backend RESTful** | AWS ECS Fargate | `http://13.221.210.214:8080/api` |
+| 📖 **Swagger UI (Documentação)** | AWS / Vercel Proxy | [https://vehicle-dealer-system.vercel.app/api/swagger-ui.html](https://vehicle-dealer-system.vercel.app/api/swagger-ui.html) |
+| 💚 **Health Check (Actuator)** | AWS / Vercel Proxy | [https://vehicle-dealer-system.vercel.app/api/actuator/health](https://vehicle-dealer-system.vercel.app/api/actuator/health) |
+
+---
+
+## 📸 Preview do Sistema
+
+| Dashboard Principal | Tela de Login & OAuth2 |
+| :---: | :---: |
+| ![Dashboard Overview](docs/images/dashboard-overview.png) | ![Login Page](docs/images/login-page.png) |
+
+| Tabela de Veículos (Catálogo) | Modal de Ficha Técnica |
+| :---: | :---: |
+| ![Tabela de Veículos](docs/images/vehicles-table.png) | ![Detalhes do Veículo](docs/images/vehicle-details-modal.png) |
+
+| Documentação Interativa Swagger UI (OpenAPI 3) |
+| :---: |
+| ![Swagger UI](docs/images/swagger-ui.png) |
+
+| Observabilidade & Dashboard de Métricas (Grafana) | Monitoramento de Targets (Prometheus) |
+| :---: | :---: |
+| ![Grafana Dashboard](docs/images/grafana-dashboard.png) | ![Prometheus Targets](docs/images/prometheus-targets.png) |
 
 ---
 
@@ -197,6 +221,10 @@ A suíte de testes do frontend valida renderização de componentes, formulário
 - **Logs Estruturados em JSON**: No perfil `prod`, os logs são formatados em JSON de linha única via Logback (`logstash-logback-encoder`), incluindo `correlationId`, `environment`, `logger` e detalhes de exceções.
 - **Rastreabilidade com Correlation ID**: O filtro `CorrelationIdFilter` extrai ou gera um identificador único para o cabeçalho `X-Correlation-Id`, propagando-o no MDC do SLF4J em todas as camadas.
 - **Métricas Prometheus e Grafana**: O Micrometer coleta métricas de execução da JVM, tempos de resposta HTTP, pool de conexões HikariCP e caches, expostas em `/actuator/prometheus` e visualizadas no Grafana.
+
+| Grafana Observability Dashboard | Prometheus Scrape Targets Status |
+| :---: | :---: |
+| ![Grafana Dashboard](docs/images/grafana-dashboard.png) | ![Prometheus Targets](docs/images/prometheus-targets.png) |
 
 ---
 

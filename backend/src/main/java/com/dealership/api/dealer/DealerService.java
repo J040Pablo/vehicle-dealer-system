@@ -37,11 +37,16 @@ public class DealerService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "dealers", key = "'dealers:page:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()")
-    public PagedResponseDTO<DealerResponseDTO> findAll(Pageable pageable) {
-        Page<DealerResponseDTO> pageResult = dealerRepository.findAll(pageable)
+    @Cacheable(value = "dealers", key = "'dealers:search:' + (#search != null && !#search.isBlank() ? #search.trim() : 'none') + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()")
+    public PagedResponseDTO<DealerResponseDTO> findAll(String search, Pageable pageable) {
+        Page<DealerResponseDTO> pageResult = dealerRepository.findAll(DealerSpecification.filter(search), pageable)
                 .map(dealerMapper::toDTO);
         return PagedResponseDTO.from(pageResult);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponseDTO<DealerResponseDTO> findAll(Pageable pageable) {
+        return findAll(null, pageable);
     }
 
     @Transactional(readOnly = true)
