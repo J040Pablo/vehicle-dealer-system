@@ -1,90 +1,60 @@
-# Frontend – Vehicle Dealer UI
+# Frontend - Vehicle Dealer UI
 
 [![Frontend CI](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/J040Pablo/vehicle-dealer-system/actions/workflows/frontend-ci.yml)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![TanStack Query](https://img.shields.io/badge/TanStack_Query-v5-FF4154?style=for-the-badge&logo=reactquery&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![Radix UI](https://img.shields.io/badge/Radix_UI-Components-161616?style=for-the-badge&logo=radix-ui&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Nginx_Alpine-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-Interface Web moderna, reativa e acessível para gestão de veículos e concessionárias. Construída com React 18, TypeScript, Vite, TanStack Query e Tailwind CSS.
+Interface web responsiva para a gestão de veículos e concessionárias, construída com React 18, TypeScript, Vite, TanStack Query e Tailwind CSS.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
-* **React 18**: Biblioteca principal para construção da interface baseada em componentes reutilizáveis.
-* **TypeScript 5**: Tipagem estática end-to-end, garantindo segurança em tempo de desenvolvimento.
-* **Vite**: Bundler de altíssima velocidade para desenvolvimento e build otimizado.
-* **TanStack Query v5 (React Query)**: Gerenciamento de estado assíncrono, cache automático, invalidação de queries e paginação server-side.
-* **React Hook Form & Zod**: Formatação, gerenciamento de formulários performático e validação de esquemas de dados.
-* **Axios**: Cliente HTTP para consumo da API RESTful com suporte a interceptores.
-* **Tailwind CSS & Radix UI**: Estilização utilitária aliada a componentes acessíveis (Dialogs, Dropdowns, Selects, Toasts).
-* **Lucide React**: Biblioteca de ícones modernos e leves.
-* **React Router DOM v6**: Roteamento SPA (Single Page Application) declarativo.
+- **React 18**: Biblioteca para construção da interface baseada em componentes reutilizáveis.
+- **TypeScript 5**: Tipagem estática end-to-end.
+- **Vite 5**: Ferramenta de build e servidor de desenvolvimento de alta velocidade.
+- **TanStack Query v5 (React Query)**: Gerenciamento de estado assíncrono, cache automatizado e paginação server-side com a estratégia `keepPreviousData`.
+- **React Hook Form & Zod**: Gerenciamento de formulários e validação de schemas (validação de formato de placa, chassi VIN de 17 caracteres e valores monetários).
+- **Axios**: Cliente HTTP para comunicação com a API RESTful, configurado com interceptores para injeção automática dos cabeçalhos `Authorization: Bearer` e `X-Correlation-Id`.
+- **Tailwind CSS & Radix UI**: Estilização utilitária aliada a componentes acessíveis (diálogos, menus dropdown, seletores e notificações toast).
+- **Lucide React**: Biblioteca de ícones utilitários.
+- **React Router DOM v6**: Roteamento Single Page Application (SPA) declarativo com proteção de rotas privadas.
 
 ---
 
-## 🏛️ Arquitetura do Módulo Web
+## Arquitetura do Frontend
 
-O projeto adota a arquitetura baseada em **Módulos por Domínio de Negócio (Feature-First Architecture)**, separando responsabilidades de forma clara e escalável:
+O projeto adota uma estrutura orientada a módulos por domínio de negócio:
 
 ```text
 frontend/src/
 ├── app/               # Provedores globais (QueryClientProvider, ThemeProvider, ToastProvider)
-├── modules/           # Módulos por Domínio de Negócio
-│   ├── dashboard/     # Métricas, estatísticas e visão geral do sistema
-│   ├── dealers/       # Páginas, formulários e modais do domínio de Concessionárias
-│   └── vehicles/      # Páginas, formulários e modais do domínio de Veículos
-├── router/            # Configuração de rotas da aplicação (React Router DOM)
+├── modules/           # Módulos por domínio de negócio
+│   ├── auth/          # Telas e fluxos de autenticação (Login, OAuth2 Redirect, AuthContext)
+│   ├── dashboard/     # Visão geral e métricas estatísticas
+│   ├── dealers/       # Páginas, formulários, tabelas e hooks de Concessionárias
+│   └── vehicles/      # Páginas, formulários, tabelas, modal de detalhes e hooks de Veículos
+├── router/            # Configuração de rotas e rotas protegidas (ProtectedRoute)
 └── shared/            # Recursos compartilhados entre múltiplos módulos
-    ├── api/           # Cliente Axios e interceptores HTTP
-    ├── components/    # Componentes UI reutilizáveis (Tabelas, Modais, Banners, Paginação)
+    ├── api/           # Cliente Axios e interceptores HTTP (http.ts)
+    ├── components/    # Componentes UI reutilizáveis (Tabelas, Modais, Paginação, Badges)
     ├── hooks/         # Hooks customizados reutilizáveis
-    ├── layouts/       # Layout principal (Sidebar, Header, Container)
-    ├── types/         # Interfaces e Types TypeScript compartilhados
+    ├── layouts/       # AppLayout (Sidebar, Header, Container)
+    ├── types/         # Interfaces TypeScript (dealer.ts, vehicle.ts, api.ts)
     └── utils/         # Utilitários de formatação (CNPJ, CEP, Moeda, Placa)
 ```
 
 ---
 
-## 📂 Estrutura de Pastas Detalhada
-
-```text
-src/
-├── modules/
-│   ├── dealers/
-│   │   ├── components/      # DealerFormModal, DealerTable, DealerActions
-│   │   ├── hooks/           # useDealers, useCreateDealer, useUpdateDealer, useDeleteDealer
-│   │   └── pages/           # DealersPage.tsx
-│   ├── vehicles/
-│   │   ├── components/      # VehicleFormModal, VehicleTable, VehicleFilterBar
-│   │   ├── hooks/           # useVehicles, useCreateVehicle, useUpdateVehicle, useDeleteVehicle
-│   │   └── pages/           # VehiclesPage.tsx
-│   └── dashboard/
-│       └── pages/           # DashboardPage.tsx
-├── shared/
-│   ├── api/                 # http.ts (Axios instance + Interceptor X-Correlation-Id)
-│   ├── components/ui/       # button, dialog, input, select, table, badge, pagination-controls
-│   ├── layouts/             # AppLayout.tsx
-│   └── types/               # dealer.ts, vehicle.ts, api.ts (PageResponse)
-```
-
----
-
-## ⚙️ Configuração e Variáveis de Ambiente
+## Configuração e Variáveis de Ambiente
 
 As variáveis de ambiente são configuradas no arquivo `.env` na raiz do módulo frontend:
 
 ```env
-# URL base para a API Backend (Em desenvolvimento via Vite Proxy ou Produção)
+# URL base para a API Backend (Em desenvolvimento via Vite Proxy)
 VITE_API_BASE_URL=/api
 ```
 
-### Configuração do Vite Proxy (`vite.config.ts`)
-Durante o desenvolvimento local, o Vite redireciona automaticamente requisições chamadas em `/api` para a API Spring Boot em `http://localhost:8080`:
+### Configuração do Proxy no Vite (`vite.config.ts`)
+Em ambiente de desenvolvimento local, o Vite redireciona as requisições direcionadas para `/api` diretamente para a API Spring Boot em `http://localhost:8080`:
 
 ```typescript
 export default defineConfig({
@@ -103,7 +73,7 @@ export default defineConfig({
 
 ---
 
-## 🚀 Execução do Projeto
+## Execução do Projeto
 
 ### 1. Instalação das Dependências
 ```bash
@@ -114,7 +84,7 @@ npm install
 ```bash
 npm run dev
 ```
-A aplicação abrirá no navegador em [http://localhost:5173](http://localhost:5173).
+A aplicação estará disponível em http://localhost:5173.
 
 ### 3. Verificar Tipagem e Linting
 ```bash
@@ -125,70 +95,38 @@ npm run lint
 ```bash
 npm run build
 ```
-Os arquivos otimizados e minificados serão gerados no diretório `dist/`.
+Os arquivos estáticos otimizados serão gerados no diretório `dist/`.
 
 ---
 
-## 🔗 Integração com a API Backend
+## Autenticação e Integração com a API Backend
 
-A comunicação HTTP é centralizada no módulo `src/shared/api/http.ts`:
+### Gerenciamento de Sessão e Interceptores Axios
+A comunicação com o backend é centralizada no cliente Axios em `src/shared/api/http.ts`:
 
-1. **Cliente Axios Pré-configurado**:
-   - `baseURL` configurado para `/api`.
-   - Headers padrão de conteúdo `Content-Type: application/json`.
+1. **Injeção de Token JWT**: O token retornado no login é mantido no armazenamento local e adicionado a todas as requisições autenticadas no cabeçalho `Authorization: Bearer <token>`.
+2. **Injeção de Correlation ID**: O request interceptor injeta dinamicamente o cabeçalho `X-Correlation-Id` utilizando `crypto.randomUUID()` caso não esteja presente, garantindo rastreabilidade fim a fim.
 
-2. **Injeção Automática de Correlation ID**:
-   - Um **Request Interceptor** verifica se a requisição contém o cabeçalho `X-Correlation-Id`.
-   - Se ausente, gera dinamicamente um UUID com `crypto.randomUUID()` e o injeta na requisição.
-   - Isso garante rastreabilidade total desde a ação do usuário no navegador até os logs do backend.
-
-```typescript
-http.interceptors.request.use((config) => {
-  if (!config.headers["X-Correlation-Id"]) {
-    config.headers["X-Correlation-Id"] = crypto.randomUUID();
-  }
-  return config;
-});
-```
+### Fluxo de Autenticação Híbrida (Local + Google OAuth2)
+- **Login Local**: Envio de credenciais para POST `/api/auth/login`, retornando o token JWT.
+- **Google OAuth2**: Redirecionamento do usuário para a autorização do Google via backend. Na conclusão, o backend emite um One-Time Code temporário (TTL 30s) e redireciona para `/oauth2/redirect?code=XYZ`. O frontend consome o endpoint POST `/api/auth/oauth2/exchange` trocando o código pelo token JWT assinado final.
 
 ---
 
-## 📑 Implementação da Paginação Server-Side
+## Módulos e Componentes CRUD
 
-O frontend utiliza paginação 100% orientada ao servidor para garantir performance em grandes conjuntos de dados:
-
-1. **Parâmetros da API**: As requisições de listagem enviam `page` (base 0), `size` (quantidade por página) e `sort` (ex: `name,asc`).
-2. **Tipagem Genérica (`PageResponse<T>`)**:
-   ```typescript
-   export interface PageResponse<T> {
-     content: T[];
-     totalPages: number;
-     totalElements: number;
-     size: number;
-     number: number; // Página atual (0-indexed)
-   }
-   ```
-3. **Gerenciamento de Estado com TanStack Query**:
-   - Os hooks `useDealers({ page, size })` e `useVehicles({ page, size })` mantêm a query key reativa `['dealers', page, size]`.
-   - O recurso `placeholderData: keepPreviousData` garante transição suave sem telas de carregamento bruscas ao mudar de página.
-4. **Componente `PaginationControls`**:
-   - Exibe informações de contagem de registros, botões de navegação (*Primeira*, *Anterior*, *Próxima*, *Última*) e seletor de quantidade de itens por página (5, 10, 20, 50).
-
----
-
-## 📋 Tabelas e Módulos CRUD
-
-### 1. Módulo de Concessionárias (`Dealers`)
+### 1. Módulo de Concessionárias (Dealers)
 - **Tabela de Concessionárias**: Exibe Nome, CNPJ (formatado com máscara `XX.XXX.XXX/XXXX-XX`), CEP, Cidade/UF e número de veículos vinculados.
-- **Formulário de Cadastro/Edição**:
-  - Ao digitar o CEP de 8 dígitos, aciona automaticamente a busca do endereço para preencher Rua, Bairro, Cidade e Estado.
-  - Validação de formato de CNPJ e CEP via Zod Schema.
+- **Formulário de Cadastro/Edição**: Validação de CNPJ e CEP com Zod. Ao informar um CEP de 8 dígitos, o formulário aciona a busca automática via API ViaCEP preenchendo os campos de endereço com suporte a alteração manual.
 
-### 2. Módulo de Veículos (`Vehicles`)
-- **Tabela de Veículos**: Exibe Marca, Modelo, Ano, Placa (formatada), Tipo de Combustível (com Badges coloridas indicando `FLEX`, `ELETRICO`, etc.) e Nome da Concessionária associada.
-- **Formulário de Cadastro/Edição**:
-  - Seletor dropdown dinâmico das concessionárias cadastradas.
-  - Seletor de Tipo de Combustível.
-  - Validação de formato de Placa (Mercosul ou padrão antigo).
+### 2. Módulo de Veículos (Vehicles)
+- **Tabela de Veículos**: Exibe Imagem/Thumbnail, Marca, Modelo, Ano, Placa, Tipo de Combustível (com badges visualmente diferenciadas), Valor (formatado em R$) e Concessionária vinculada. A coluna de Chassi foi intencionalmente removida da tabela principal para evitar poluição visual.
+- **Formulário de Cadastro/Edição**: Seleção de Concessionária, Tipo de Combustível, validação de Placa (padrão antigo ou Mercosul), validação de Chassi VIN de 17 caracteres e inserção de valor monetário em R$.
+- **Modal de Detalhes do Veículo (`VehicleDetailsModal`)**: Exibe as informações completas do veículo selecionado em um modal dedicado de leitura, apresentando foto em alta resolução, Chassi completo (VIN), valor formatado, datas de cadastro/atualização e dados da concessionária associada.
+- **Gerenciamento de Imagens**: Permite a seleção e upload de foto do veículo via requisição multipart enviada para o backend com armazenamento integrado no AWS S3.
 
 ---
+
+## Paginação Server-Side
+
+A listagem de dados utiliza paginação 100% orientada ao servidor via parâmetros `page` (0-indexed), `size` e `sort`. Os hooks `useDealers` e `useVehicles` utilizam TanStack Query para gerenciar a reatividade das consultas e garantir transição sem flicker através do componente `PaginationControls`.

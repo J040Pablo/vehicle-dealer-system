@@ -146,19 +146,24 @@ describe("VehicleTable", () => {
     expect(onSelectDealerMock).toHaveBeenCalledWith(1);
   });
 
-  it("should trigger edit and delete action callbacks when buttons are clicked", async () => {
+  it("should trigger view, edit and delete action callbacks when buttons are clicked", async () => {
     const user = userEvent.setup();
+    const onViewMock = vi.fn();
     const onEditMock = vi.fn();
     const onDeleteMock = vi.fn();
 
     render(
       <MemoryRouter>
-        <VehicleTable {...defaultProps} onEdit={onEditMock} onDelete={onDeleteMock} />
+        <VehicleTable {...defaultProps} onView={onViewMock} onEdit={onEditMock} onDelete={onDeleteMock} />
       </MemoryRouter>
     );
 
+    const viewBtn = screen.getByRole("button", { name: "Visualizar detalhes do veículo Toyota Corolla" });
     const editBtn = screen.getByRole("button", { name: "Editar veículo Toyota Corolla" });
     const deleteBtn = screen.getByRole("button", { name: "Excluir veículo Toyota Corolla" });
+
+    await user.click(viewBtn);
+    expect(onViewMock).toHaveBeenCalledWith(mockVehicles[0]);
 
     await user.click(editBtn);
     expect(onEditMock).toHaveBeenCalledWith(mockVehicles[0]);

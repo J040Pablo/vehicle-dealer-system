@@ -45,6 +45,10 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long>, JpaSpec
 
     boolean existsByPlateAndIdNot(String plate, Long id);
 
+    boolean existsByChassis(String chassis);
+
+    boolean existsByChassisAndIdNot(String chassis, Long id);
+
     Optional<Vehicle> findByPlate(String plate);
 
     long countByDealerIsNull();

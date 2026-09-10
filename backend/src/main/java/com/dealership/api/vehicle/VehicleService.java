@@ -91,7 +91,7 @@ public class VehicleService {
     }
 
     private String normalizeImageUrl(String imageUrl) {
-        if (imageUrl == null || imageUrl.isBlank()) {
+        if (!org.springframework.util.StringUtils.hasText(imageUrl)) {
             return null;
         }
         String trimmed = imageUrl.trim();
@@ -107,6 +107,13 @@ public class VehicleService {
         return trimmed;
     }
 
+    private String normalizeChassis(String chassis) {
+        if (!org.springframework.util.StringUtils.hasText(chassis)) {
+            return null;
+        }
+        return chassis.trim();
+    }
+
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "filters", allEntries = true),
@@ -115,14 +122,19 @@ public class VehicleService {
     public VehicleResponseDTO create(VehicleRequestDTO dto) {
         String normalizedPlate = validateAndNormalizePlate(dto.plate());
         String normalizedImageUrl = normalizeImageUrl(dto.imageUrl());
+        String normalizedChassis = normalizeChassis(dto.chassis());
         log.info("Cadastrando veículo: Marca={} Modelo={} Placa={}", dto.brand(), dto.model(), normalizedPlate);
 
         if (vehicleRepository.existsByPlate(normalizedPlate)) {
             throw new DuplicatePlateException(normalizedPlate);
         }
 
+        if (normalizedChassis != null && vehicleRepository.existsByChassis(normalizedChassis)) {
+            throw new BusinessException("Já existe um veículo cadastrado com o chassi informado.");
+        }
+
         VehicleRequestDTO normalizedDto = new VehicleRequestDTO(
-                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), dto.chassis(), dto.value(), normalizedImageUrl, dto.dealerId()
+                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), normalizedChassis, dto.value(), normalizedImageUrl, dto.dealerId()
         );
 
         Vehicle vehicle = vehicleMapper.toEntity(normalizedDto);
@@ -160,12 +172,17 @@ public class VehicleService {
 
         String normalizedPlate = validateAndNormalizePlate(dto.plate());
         String normalizedImageUrl = normalizeImageUrl(dto.imageUrl());
+        String normalizedChassis = normalizeChassis(dto.chassis());
         if (vehicleRepository.existsByPlateAndIdNot(normalizedPlate, id)) {
             throw new DuplicatePlateException(normalizedPlate);
         }
 
+        if (normalizedChassis != null && vehicleRepository.existsByChassisAndIdNot(normalizedChassis, id)) {
+            throw new BusinessException("Já existe um veículo cadastrado com o chassi informado.");
+        }
+
         VehicleRequestDTO normalizedDto = new VehicleRequestDTO(
-                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), dto.chassis(), dto.value(), normalizedImageUrl, dto.dealerId()
+                dto.brand(), dto.model(), dto.year(), normalizedPlate, dto.color(), dto.fuelType(), normalizedChassis, dto.value(), normalizedImageUrl, dto.dealerId()
         );
 
         vehicleMapper.updateEntityFromDTO(normalizedDto, vehicle);

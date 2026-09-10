@@ -46,6 +46,7 @@ class JacksonDefaultTypingStrategyTest {
                 .allowIfSubType("java.lang.")
                 .allowIfSubType("java.util.")
                 .allowIfSubType("java.time.")
+                .allowIfSubType("java.math.")
                 .allowIfSubType("org.springframework.data.domain.")
                 .allowIfSubTypeIsArray()
                 .build();

@@ -39,8 +39,9 @@ interface DealerTableProps {
 
 function DealerThumbnail({ imageUrl, name }: { imageUrl?: string | null; name: string }) {
   const [hasError, setHasError] = useState(false);
+  const normalizedUrl = imageUrl?.trim();
 
-  if (!imageUrl || hasError) {
+  if (!normalizedUrl || hasError) {
     return (
       <div className="h-10 w-10 shrink-0 rounded-md border border-border bg-muted/30 flex items-center justify-center text-muted-foreground/60 shadow-xs overflow-hidden">
         <Building2 className="h-5 w-5 text-muted-foreground" />
@@ -51,7 +52,7 @@ function DealerThumbnail({ imageUrl, name }: { imageUrl?: string | null; name: s
   return (
     <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md border border-border bg-muted/30 flex items-center justify-center shadow-xs">
       <img
-        src={imageUrl}
+        src={normalizedUrl}
         alt={name}
         loading="lazy"
         onError={() => setHasError(true)}

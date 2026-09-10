@@ -44,7 +44,7 @@ public class Vehicle {
     @Column(name = "fuel_type", nullable = false, length = 20)
     private FuelType fuelType;
 
-    @Column(name = "chassis", length = 100)
+    @Column(name = "chassis", unique = true, length = 100)
     private String chassis;
 
     @Column(name = "value", precision = 15, scale = 2)
@@ -75,5 +75,18 @@ public class Vehicle {
 
     public boolean isAssociatedWith(Long dealerId) {
         return this.dealer != null && this.dealer.getId() != null && this.dealer.getId().equals(dealerId);
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void normalizeFields() {
+        if (this.imageUrl != null) {
+            String trimmed = this.imageUrl.trim();
+            this.imageUrl = trimmed.isEmpty() ? null : trimmed;
+        }
+        if (this.chassis != null) {
+            String trimmed = this.chassis.trim();
+            this.chassis = trimmed.isEmpty() ? null : trimmed;
+        }
     }
 }

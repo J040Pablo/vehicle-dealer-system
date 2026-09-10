@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Car, Pencil, Trash2 } from "lucide-react";
+import { Car, Eye, Pencil, Trash2 } from "lucide-react";
 
 import {
   Table,
@@ -23,6 +23,7 @@ interface VehicleTableProps {
   isFiltered?: boolean;
   onClearFilter?: () => void;
   isLoading: boolean;
+  onView?: (vehicle: Vehicle) => void;
   onEdit: (vehicle: Vehicle) => void;
   onDelete: (vehicle: Vehicle) => void;
   onCreate: () => void;
@@ -40,8 +41,9 @@ interface VehicleTableProps {
 
 function VehicleThumbnail({ url, brand, model }: { url?: string | null; brand: string; model: string }) {
   const [hasError, setHasError] = useState(false);
+  const normalizedUrl = url?.trim();
 
-  if (!url || hasError) {
+  if (!normalizedUrl || hasError) {
     return (
       <div className="h-14 w-24 shrink-0 rounded-md border border-border bg-muted/30 flex items-center justify-center text-muted-foreground/60 shadow-xs overflow-hidden">
         <Car className="h-5 w-5 text-muted-foreground" />
@@ -52,7 +54,7 @@ function VehicleThumbnail({ url, brand, model }: { url?: string | null; brand: s
   return (
     <div className="h-14 w-24 shrink-0 overflow-hidden rounded-md border border-border bg-muted/30 flex items-center justify-center shadow-xs">
       <img
-        src={url}
+        src={normalizedUrl}
         alt={`${brand} ${model}`}
         loading="lazy"
         onError={() => setHasError(true)}
@@ -67,6 +69,7 @@ export function VehicleTable({
   isFiltered = false,
   onClearFilter,
   isLoading,
+  onView,
   onEdit,
   onDelete,
   onCreate,
@@ -161,6 +164,17 @@ export function VehicleTable({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
+                    {onView && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onView(vehicle)}
+                        aria-label={`Visualizar detalhes do veículo ${vehicle.brand} ${vehicle.model}`}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"

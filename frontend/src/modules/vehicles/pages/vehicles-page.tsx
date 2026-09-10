@@ -19,6 +19,7 @@ import { useDealers } from "@/modules/dealers/hooks/use-dealers";
 import { VehicleTable } from "@/modules/vehicles/components/vehicle-table";
 import { VehicleFormDialog } from "@/modules/vehicles/components/vehicle-form-dialog";
 import { DeleteVehicleDialog } from "@/modules/vehicles/components/delete-vehicle-dialog";
+import { VehicleDetailsDialog } from "@/modules/vehicles/components/vehicle-details-dialog";
 import { VehicleTableSkeleton } from "@/shared/components/skeletons/vehicle-table-skeleton";
 import { useDebounce } from "@/shared/hooks/use-debounce";
 import type { Vehicle } from "@/modules/vehicles/types/vehicle";
@@ -87,6 +88,7 @@ export function VehiclesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [deletingVehicle, setDeletingVehicle] = useState<Vehicle | null>(null);
+  const [viewingVehicle, setViewingVehicle] = useState<Vehicle | null>(null);
 
   function openCreateForm() {
     setEditingVehicle(null);
@@ -275,6 +277,7 @@ export function VehiclesPage() {
           isFiltered={isFiltered}
           onClearFilter={clearAllFilters}
           isLoading={false}
+          onView={setViewingVehicle}
           onEdit={openEditForm}
           onDelete={setDeletingVehicle}
           onCreate={openCreateForm}
@@ -292,6 +295,12 @@ export function VehiclesPage() {
 
       <VehicleFormDialog open={formOpen} onOpenChange={setFormOpen} vehicle={editingVehicle} />
       <DeleteVehicleDialog vehicle={deletingVehicle} onOpenChange={(open) => !open && setDeletingVehicle(null)} />
+      <VehicleDetailsDialog
+        open={!!viewingVehicle}
+        onOpenChange={(open) => !open && setViewingVehicle(null)}
+        vehicle={viewingVehicle}
+        onEdit={openEditForm}
+      />
     </div>
   );
 }

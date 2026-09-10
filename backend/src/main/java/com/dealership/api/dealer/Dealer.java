@@ -78,5 +78,9 @@ public class Dealer {
         if (this.cep != null) {
             this.cep = CepUtils.normalize(this.cep);
         }
+        if (this.imageUrl != null) {
+            String trimmed = this.imageUrl.trim();
+            this.imageUrl = trimmed.isEmpty() ? null : trimmed;
+        }
     }
 }
