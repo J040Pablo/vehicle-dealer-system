@@ -28,7 +28,10 @@ public class DealerController {
     public ResponseEntity<PagedResponseDTO<DealerResponseDTO>> findAll(
             @RequestParam(required = false) String search,
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
-        return ResponseEntity.ok(dealerService.findAll(search, pageable));
+        if (search != null && !search.isBlank()) {
+            return ResponseEntity.ok(dealerService.findAll(search, pageable));
+        }
+        return ResponseEntity.ok(dealerService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
