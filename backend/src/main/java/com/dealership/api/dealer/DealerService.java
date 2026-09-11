@@ -45,6 +45,17 @@ public class DealerService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "dealers", key = "'dealers:search:' + (#search != null && !#search.isBlank() ? #search.trim() : 'none') + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()")
+    public PagedResponseDTO<DealerResponseDTO> findAll(String search, Pageable pageable) {
+        if (search == null || search.isBlank()) {
+            return findAll(pageable);
+        }
+        Page<DealerResponseDTO> pageResult = dealerRepository.findAll(DealerSpecification.filter(search), pageable)
+                .map(dealerMapper::toDTO);
+        return PagedResponseDTO.from(pageResult);
+    }
+
+    @Transactional(readOnly = true)
     @Cacheable(value = "dealers", key = "'dealers:all'")
     public List<DealerResponseDTO> findAll() {
         return dealerRepository.findAll().stream()

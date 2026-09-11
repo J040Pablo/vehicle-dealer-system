@@ -9,6 +9,7 @@ export const dealerApi = {
         page: params?.page ?? 0,
         size: params?.size ?? 10,
         sort: params?.sort ?? "id,asc",
+        search: params?.search?.trim() || undefined,
       },
     });
     return data;

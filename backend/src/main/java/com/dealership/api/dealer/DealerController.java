@@ -24,9 +24,13 @@ public class DealerController {
     private final DealerService dealerService;
 
     @GetMapping
-    @Operation(summary = "Listar concessionárias com paginação")
+    @Operation(summary = "Listar concessionárias com paginação e busca textual")
     public ResponseEntity<PagedResponseDTO<DealerResponseDTO>> findAll(
+            @RequestParam(required = false) String search,
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        if (search != null && !search.isBlank()) {
+            return ResponseEntity.ok(dealerService.findAll(search, pageable));
+        }
         return ResponseEntity.ok(dealerService.findAll(pageable));
     }
 

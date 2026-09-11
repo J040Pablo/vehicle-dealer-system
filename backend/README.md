@@ -185,15 +185,22 @@ O histórico e a estrutura do PostgreSQL são gerenciados pelo Flyway através d
 
 A especificação OpenAPI 3.0 é exposta dinamicamente:
 
-- **Swagger UI**: http://localhost:8080/api/swagger-ui.html
-- **OpenAPI JSON Spec**: http://localhost:8080/api/v3/api-docs
+- **Swagger UI (Produção)**: [https://vehicle-dealer-system.vercel.app/api/swagger-ui.html](https://vehicle-dealer-system.vercel.app/api/swagger-ui.html)
+- **Swagger UI (Direto AWS ECS)**: `http://13.221.210.214:8080/api/swagger-ui.html`
+- **OpenAPI JSON Spec**: `http://13.221.210.214:8080/api/v3/api-docs`
+
+![Swagger UI](../docs/images/swagger-ui.png)
 
 ---
 
-## Actuator e Health Checks
+## Actuator e Health Checks & Observabilidade
 
 - **Health Check**: http://localhost:8080/api/actuator/health
 - **Prometheus Metrics**: http://localhost:8080/api/actuator/prometheus
+
+| Grafana Observability Dashboard | Prometheus Target Health |
+| :---: | :---: |
+| ![Grafana Dashboard](../docs/images/grafana-dashboard.png) | ![Prometheus Targets](../docs/images/prometheus-targets.png) |
 
 ---
 
